@@ -1,9 +1,9 @@
 # KaggleCompetitions
-Para veres se estas sincronizada:
-git status
-
 Para atualizares o teu pc: <br/>
 git pull
+
+Para veres se estas sincronizada:<br/>
+git status
 
 Para enviares atualizações: <br/>
 git pull <br/>
