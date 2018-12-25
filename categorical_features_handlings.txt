@@ -1,0 +1,2 @@
+https://www.analyticsvidhya.com/blog/2015/11/easy-methods-deal-categorical-variables-predictive-modeling/?fbclid=IwAR02OSXNQVCR-1BvO2LMszFaakfRDPMUay1Mnq-1EHorUwg_HydTecXf6Pw
+https://www.analyticsvidhya.com/blog/2017/08/catboost-automated-categorical-data/?fbclid=IwAR2hgBss0bwuoIYk_WKGsc2XQRGGWtRRP8KtdflVmd2gRUystGTH9tea81s
