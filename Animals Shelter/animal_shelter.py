@@ -70,8 +70,28 @@ df['dangerous'] = df['Breed'].apply(dangerous_breed,1)
 
 #colour - specified when 1 or 2, more than 2 as 'tricolored'; worth creating a no. colours variable? Doesn't seem useful
 
-#for all attributes look at no. observations per attribute_value x outcome_value to see if other derived columns might be useful
+#for all attributes look at no. observations per attribute_value x outcome_value 
+#age
+print(pd.pivot_table(df,values=['age'],columns = ['OutcomeType'], aggfunc = [min,max,np.mean]))
+#there are no adoptions of animals younger than a month
+#the average age for death is the lowest whereas for euthanasia is the 2nd highest, it seems that death is correlated with younger animals unable to survive arsh conditions
+#adoption and transfer have a lower mean, with transfer and return to owner having the biggest max-min
 
+#sex
+print(pd.pivot_table(df,index=['sex','sex_intervention'], columns = ['OutcomeType'], aggfunc = 'count'))
+#dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit); gender balance is fine
+
+#Breed
+pd.pivot_table(df,index=['Breed'], columns = ['OutcomeType'], aggfunc = 'count').to_csv('breed_pivot.csv')
+#cats are less likely to be returned to owner ?
+#some breeds have very few observations, to use this attribute a more summarised one will be needed (size, country of origin, life expectancy?)
+
+#Colour
+pd.pivot_table(df,index=['Color'], columns = ['OutcomeType'], aggfunc = 'count').to_csv('colour_pivot.csv')
+#unbalanced attribute, with Black and Black/White having considerably more observations than other colours
+#only use I can envision for colour would be for likelihood of adoption, with some colours being more likely to be adopted, but can't see any trend
+
+#check dog/cat balance
 #will need to repeat for test or can create a 'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
 #df.to_csv('dataframe.csv')
 
