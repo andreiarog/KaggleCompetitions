@@ -1,7 +1,3 @@
-#comments to Daniela
-#similarity threshold in dangerous traits
-#check possible values for SexUponOutcome
-
 #functions
 
 def column_split(df,column,sep,n,new_col):
@@ -12,3 +8,37 @@ def column_split(df,column,sep,n,new_col):
 		df[new_col[i]] = df[column].str.split(sep,n,True)[i]
 		i+=1
 	return df
+	
+def age_standard(row):
+	'''function to convert the age to a standard numerical measurement in days (smallest unit of measurement present)'''
+	if 'day' in str(row):
+		val = float(row.split(' ')[0])
+	elif 'week' in str(row):
+		val = float(row.split(' ')[0])*7
+	#it is assumed that a year has 365 days, so a month has 30.4 days
+	elif 'month' in str(row):
+		val = round(int(row.split(' ')[0])*30.4)
+	elif 'year' in str(row):	
+		val = round(int(row.split(' ')[0])*365)
+	else:
+		val = None
+	return val
+
+def pure_mix(row):
+	'''function to create a column that flags if an animal is pure breed or mix'''
+	if 'Mix' in str(row):
+		val='mix'
+	elif '/' in str(row):
+		val='mix'
+	else:
+		val='pure'
+	return val
+
+def dangerous_breed(row):
+	'''function to create a column that flags dangerous breeds'''
+	dangerous_list = ['Staffordshire Bull Terrier', 'American Pit Bull Terrier', 'American Staffordshire Terrier', 'Dogo Argentino', 'American Bulldog', 'Tosa Inu', 'Dogo Canario', 'Cane Corso', 'Fila Brasileiro', 'Brazilian Mastiff', 'Akita Inu', 'Dogue De Bordeaux', 'Bandog', 'Bullmastiff', 'Doberman Pinsch', 'Ca de Bou', 'Majorca Mastiff','Kuvasz', 'German Shepherd', 'Mastino Neapolitano', 'Neapolitan Mastiff',  'Rottweiler', 'Chow Chow', 'Japanese Mastiff']
+	if any(i in str(row) for i in dangerous_list):
+		val = 'dangerous'
+	else:
+		val = 'ok'
+	return val
