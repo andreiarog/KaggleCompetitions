@@ -7,7 +7,7 @@ import functions as func #file contained the user created functions
 train = pd.read_csv('train.csv')
 test = pd.read_csv('test.csv')
 
-print(train)
+#print(train)
 
 #comments to Andreia
 #Name field might be relevant when NaN (convert to binary 'known_name') - higher probability of death or euthanasia (?) due to poorer condition when arriving at shelter
@@ -16,7 +16,8 @@ print(train)
 	
 #main	
 df = func.column_split(train, 'SexuponOutcome', ' ', 2, ['sex_intervention', 'sex'])
-#how to treat Unknown in sex_intervention (string) and None in sex (null value)?
+df['sex']= df['sex'].apply(func.unknown_value,1)
+df['sex_intervention']= df['sex_intervention'].apply(func.unknown_value,1)
 
 #.apply allows to apply functions to each row or column
 df['age'] = df['AgeuponOutcome'].apply(func.age_standard,1)
@@ -49,6 +50,8 @@ print(pd.pivot_table(df,index=['sex','sex_intervention'], columns = ['OutcomeTyp
 #pd.pivot_table(df,index=['Color'], columns = ['OutcomeType'], aggfunc = 'count').to_csv('colour_pivot.csv')
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
 #only use I can envision for colour would be for likelihood of adoption, with some colours being more likely to be adopted, but can't see any trend
+
+#convert all categorical variables to dummy
 
 #'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
 #df.to_csv('dataframe.csv')
