@@ -1,4 +1,5 @@
 #functions
+import pandas as pd
 
 def column_split(df,column,sep,n,new_col):
 	'''function to create new columns from the original one when 2 or more attributes are stored in the same column, returns the new dataframe'''
@@ -9,7 +10,7 @@ def column_split(df,column,sep,n,new_col):
 		i+=1
 	return df
 
-	def create_dummies(df,column_name):
+def create_dummies(df,column_name):
     """Create Dummy Columns (One Hot Encoding) from a single Column
 
     Usage
@@ -45,6 +46,16 @@ def normalize(df,column_name, mode):
     
     return df
 	
+def sex_int(row):
+	'''function to rename as Intervention all animals that were either neutered or spayed'''
+	if 'Unknown' in str(row):
+		val='Unknown'
+	elif 'Intact' in str(row):
+		val='Intact'
+	else:
+		val='Intervention'
+	return val
+	
 def age_standard(row):
 	'''function to convert the age to a standard numerical measurement in days (smallest unit of measurement present)'''
 	if 'day' in str(row):
@@ -58,6 +69,14 @@ def age_standard(row):
 		val = round(int(row.split(' ')[0])*365)
 	else:
 		val = None
+	return val
+
+def unknown_age(row):
+	'''function to convert nulls/unknown to unknown'''
+	if row > 0:
+		val = 'Known'
+	else:
+		val = 'Unknown'
 	return val
 
 def pure_mix(row):
@@ -79,12 +98,34 @@ def dangerous_breed(row):
 		val = 'ok'
 	return val
 	
+def breed_size(row): #not finished!
+	'''function to create a column with the breed's size'''
+	giant_list = ['Akita', 'Anatolian Sheepdog','Bernese Mountain Dog','Bloodhound','Borzoi','Bullmastiff','Great Dane','Great Pyrenees',
+'Great Swiss Mountain Dog','Irish Wolfhound','Kuvasz','Mastiff','Neopolitan Mastiff','Newfoundland','Otter Hound','Rottweiler','Saint Bernard']
+	large_list = []
+	medium_list = []
+	small_list = []
+	toy_list = []
+	if any(i in str(row) for i in giant_list):
+		val = 'giant'
+	elif any(i in str(row) for i in large_list):
+		val = 'large'
+	elif any(i in str(row) for i in medium_list):
+		val = 'medium'
+	elif any(i in str(row) for i in small_list):
+		val = 'small'
+	elif any(i in str(row) for i in toy_list):
+		val = 'toy'
+	else:
+		val = 'other'
+	return val
+	
 def unknown_value(row):
 	'''function to convert nulls/unknown to unknown'''
 	str1 = 'unknown'
 	str2 = ' '
 	if str(row).lower()== str1.lower() or row == None or str(row) == 'nan':
-		val = 'Unknwon'
+		val = 'Unknown'
 	else:
 		val = str(row)
 	return val
