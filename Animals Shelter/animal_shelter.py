@@ -47,19 +47,15 @@ print(pd.pivot_table(df,values=['age'],columns = ['OutcomeType'], aggfunc = [min
 
 df['pure_mix'] = df['Breed'].apply(func.pure_mix,1)
 df['dangerous'] = df['Breed'].apply(func.dangerous_breed,1)
-df['size'] = df['Breed'].apply(func.breed_size,1)#function breed_size not finished!
-print(pd.pivot_table(df,index=['dangerous','size'], columns = ['OutcomeType'], aggfunc = 'count'))
+df['size'] = df['Breed'].apply(func.breed_size,1)
+print(pd.pivot_table(df,index=['dangerous','size'], columns = ['AnimalType'], aggfunc = 'count'))
+
+#can't find a good size list for cats; breed info will be very different based on animal type; should classify separately?
+#should we do a var for hair length for cats? Hypoallergenic breeds?
+#list for dogs still incomplete, but covering most frequent breeds
 
 
 
-#for all attributes look at no. observations per attribute_value vs outcome_value 
-
-
-
-
-
-#what else can be done with breed?
-#cats are less likely to be returned to owner ?
 #some breeds have very few observations, to use this attribute a more summarised one will be needed (size, country of origin, life expectancy?)
 
 #Colour
@@ -71,6 +67,6 @@ print(pd.pivot_table(df,index=['dangerous','size'], columns = ['OutcomeType'], a
 #convert all categorical variables to dummy using function already created
 
 #'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
-#df.to_csv('dataframe.csv')
+df.to_csv('dataframe.csv')
 #print(df)
 
