@@ -98,14 +98,28 @@ def dangerous_breed(row):
 		val = 'ok'
 	return val
 	
-def breed_size(row): #not finished!
+def breed_size(row):
 	'''function to create a column with the breed's size'''
-	giant_list = ['Akita', 'Anatolian Sheepdog','Bernese Mountain Dog','Bloodhound','Borzoi','Bullmastiff','Great Dane','Great Pyrenees',
+	giant_list = ['Akita', 'Anatolian Sheepdog','Anatol Shepherd','Bernese Mountain Dog','Bloodhound','Borzoi','Bullmastiff','Great Dane','Great Pyrenees',
 'Great Swiss Mountain Dog','Irish Wolfhound','Kuvasz','Mastiff','Neopolitan Mastiff','Newfoundland','Otter Hound','Rottweiler','Saint Bernard']
-	large_list = []
-	medium_list = []
-	small_list = []
-	toy_list = []
+	large_list = ['Afghan Hound','Alaskan Malamute','American Foxhound','American Bulldog','Beauceron','Belgian Malinois','Belgian Sheepdog','Belgian Tervuren',
+'Black And Tan Coonhound','Black Russian Terrier','Bouvier Des Flandres','Boxer','Briard','Chesapeake Bay Retriever','Clumber Spaniel','Collie',
+'Curly Coated Retriever','Doberman Pinsch','English Foxhound','English Setter','Flat Coat Retriever','German Shepherd','German Shorthaired Pointer',
+'German Wirehaired Pointer','Giant Schnauzer','Golden Retriever','Gordon Setter','Greyhound','Irish Setter','Komondor','Labrador Retriever',
+'Old English Sheepdog','Poodle Standard','Rhodesian Ridgeback','Rhod Ridgeback','Scottish Deerhound','Spinone Italiano','Tibetan Mastiff','Weimaraner']
+	medium_list = ['Airedale Terrier','American Staffordshire Terrier','American Water Spaniel','Alaskan Husky','Australian Cattle Dog','Australian Shepherd','Basset Hound','Bearded Collie','Black Mouth Cur','Blue Lacy','Border Collie',
+'Brittany','Bulldog','Bull Terrier','Canaan Dog','Carolina Dog','Catahoula','Chinese Shar Pei','Chow Chow','Cocker Spaniel',
+'Dalmatian','English Springer Spaniel','Field Spaniel','Flat Coated Retriever','Finnish Spitz','Harrier','Ibizan Hound','Irish Terrier',
+'Irish Water Spaniel','Keeshond','Kerry Blue Terrier','Norwegian Elkhound','Nova Scotia Duck Tolling Retriever','Petit Basset Griffon Vendeen',
+'Pharaoh Hound','Pit Bull','Plott Hound','Pointer','Polish Lowland Sheepdog','Portuguese Water Dog','Queensland Heeler','Redbone Coonhound','Redbone Hound','Saluki','Samoyed','Siberian Husky',
+'Soft-Coated Wheaten Terrier','Staffordshire Bull Terrier','Standard Schnauzer','Sussex Spaniel','Vizsla','Welsh Springer Spaniel','Wirehaired Pointing Griffon']
+	small_list = ['American Eskimo','Australian Terrier','Australian Kelpie','Basenji','Beagle',
+'Bedlington Terrier','Bichon Frise','Border Terrier','Boston Terrier','Brussels Griffon','Bruss Griffon','Cairn Terrier','Cardigan Welsh Corgi',
+'Cavalier King Charles Spaniel','Coton de Tulear','Dachshund','Dandie Dinmont Terrier','English Toy Spaniel','Fox Terrier – Smooth',
+'Wire Hair Fox Terrier','French Bulldog','German Pinscher','Glen Imaal Terrier','Jack Russell Terrier','Lhasa Apso','Lakeland Terrier','Manchester Terrier (Standard)',
+'Manchester Terrier','Miniature',' Miniature Poodle','Norfolk Terrier','Norwich Terrier','Pug','Puli','Pembroke Welsh Corgi','Rat Terrier','Schipperke','Scottish Terrier','Sealyham Terrier','Shetland Sheepdog','Shiba Inu',
+'Shih Tzu','Silky Terrier','Skye Terrier','Soft Coated Wheaten Terrier','Staffordshire','Tibetan Spaniel','Tibetan Terrier','Welsh Terrier','West Highland','Whippet']
+	toy_list = ['Affenpinscher','Chihuahua','Chinese Crested','Italian Greyhound','Japanese Chin','Maltese','Manchester Terrier (Toy)','Papillon','Pekingese','Pomeranian',' Toy Poodle','Toy Fox Terrier','Yorkshire Terrier']
 	if any(i in str(row) for i in giant_list):
 		val = 'giant'
 	elif any(i in str(row) for i in large_list):
