@@ -14,33 +14,50 @@ test = pd.read_csv('test.csv')
 #0 probability of return_to_owner (? check no. NaN name observations per value of outcome)
 #check dog/cat balance
 	
-#main	
+#main
+#.apply allows to apply functions to each row or column
+
+#sex
 df = func.column_split(train, 'SexuponOutcome', ' ', 2, ['sex_intervention', 'sex'])
 df['sex']= df['sex'].apply(func.unknown_value,1)
-df['sex_intervention']= df['sex_intervention'].apply(func.unknown_value,1)
+df['sex_intervention']= df['sex_intervention'].apply(func.unknown_value,1).apply(func.sex_int,1)
+#print(pd.pivot_table(df,index=['sex','sex_intervention'], columns = ['OutcomeType'], aggfunc = 'count'))
 
-#.apply allows to apply functions to each row or column
-df['age'] = df['AgeuponOutcome'].apply(func.age_standard,1)
-#0 years = 0.0 and blanks kept as nulls. Convert all to the same way of treating nulls? Which? Or what does 0 years mean?
+df = func.create_dummies(df,'sex')
+df = func.create_dummies(df,'sex_intervention')
+#drop 3rd dummy since perfectly correlated with others?
 
-df['pure_mix'] = df['Breed'].apply(func.pure_mix,1)
+#dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
+#good correlation between sex_intervention and outcome	
 
-df['dangerous'] = df['Breed'].apply(func.dangerous_breed,1)
-
-#for all attributes look at no. observations per attribute_value vs outcome_value 
 #age
+df['age'] = df['AgeuponOutcome'].apply(func.age_standard,1)
+df['age_known']=df['age'].apply(func.unknown_age,1)
+#0 days consider unknown age (? can't remember what we agreed)
+
+print(pd.pivot_table(df,index=['age_known'], columns = ['OutcomeType'], aggfunc = 'count'))
+#there are very few animals with unknown age. Exclude those with unknown? Or replace age by mean? Which mean (overall, class, etc)?
+
 print(pd.pivot_table(df,values=['age'],columns = ['OutcomeType'], aggfunc = [min,max,np.mean]))
 #there are no adoptions of animals younger than a month
 #the average age for death is the lowest whereas for euthanasia is the 2nd highest, it seems that death is correlated with younger animals unable to survive arsh conditions
 #adoption and transfer have a lower mean, with transfer and return to owner having the biggest max-min
 
-#sex
-print(pd.pivot_table(df,index=['sex','sex_intervention'], columns = ['OutcomeType'], aggfunc = 'count'))
-#dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
-#good coreelation between sex_intervention and outcome
-
 #Breed
-#pd.pivot_table(df,index=['Breed'], columns = ['OutcomeType'], aggfunc = 'count').to_csv('breed_pivot.csv')
+
+df['pure_mix'] = df['Breed'].apply(func.pure_mix,1)
+df['dangerous'] = df['Breed'].apply(func.dangerous_breed,1)
+df['size'] = df['Breed'].apply(func.breed_size,1)#function breed_size not finished!
+print(pd.pivot_table(df,index=['dangerous','size'], columns = ['OutcomeType'], aggfunc = 'count'))
+
+
+
+#for all attributes look at no. observations per attribute_value vs outcome_value 
+
+
+
+
+
 #what else can be done with breed?
 #cats are less likely to be returned to owner ?
 #some breeds have very few observations, to use this attribute a more summarised one will be needed (size, country of origin, life expectancy?)
@@ -51,8 +68,9 @@ print(pd.pivot_table(df,index=['sex','sex_intervention'], columns = ['OutcomeTyp
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
 #only use I can envision for colour would be for likelihood of adoption, with some colours being more likely to be adopted, but can't see any trend
 
-#convert all categorical variables to dummy
+#convert all categorical variables to dummy using function already created
 
 #'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
 #df.to_csv('dataframe.csv')
+#print(df)
 
