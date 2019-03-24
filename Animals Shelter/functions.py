@@ -135,7 +135,7 @@ def breed_size(row):
 	return val
 
 def breed_intelligence(row):
-	'''function to create a column with the breed's size'''
+	'''function to create a column with the breed's intelligence'''
 	bright_list = ['Border Collie','Poodle','German Shepherd Dog','Golden Retriever','Doberman Pinscher','Shetland Sheepdog','Labrador Retriever','Papillon','Rottweiler','Australian Cattle Dog','German Shepherd']
 	excellent_list = ['Catahoula','Black Mouth Cur','Pembroke Welsh Corgi','Miniature Schnauzer','English Springer Spaniel','Belgian Shepherd Dog (Tervuren)','Pit Bull',
 'Schipperke','Belgian Sheepdog','Collie','Keeshond','German Shorthaired Pointer','Flat Coat Retriever','English Cocker Spaniel','Standard Schnauzer','Brittany','Cocker Spaniel',
@@ -165,6 +165,16 @@ def breed_intelligence(row):
 		val = 'lowest'
 	else:
 		val = 'other'
+	return val
+	
+def breed_colour(row):
+	'''function to create a column that flags unicolour vs multi-colour'''
+	if 'Tricolor' in str(row):
+		val = 'multicolour'
+	elif '/' in str(row):
+		val = 'bicolour'
+	else:
+		val = 'unicolour'
 	return val
 	
 def unknown_value(row):
