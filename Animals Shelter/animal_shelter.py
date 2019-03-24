@@ -55,13 +55,12 @@ print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfun
 #should we do a var for hair length for cats? Hypoallergenic breeds?
 #size and intelligence list for dogs still incomplete, but covering most frequent breeds (better for size)
 
-
-
-#some breeds have very few observations, to use this attribute a more summarised one will be needed (size, country of origin, life expectancy?)
-
 #Colour
-#Specified when 1 or 2, more than 2 as 'tricolored'; worth creating a no. colours variable? Doesn't seem useful
-#pd.pivot_table(df,index=['Color'], columns = ['OutcomeType'], aggfunc = 'count').to_csv('colour_pivot.csv')
+
+df['no_colours'] = df['Color'].apply(func.breed_colour,1)
+print(pd.pivot_table(df,index=['no_colours'], columns = ['AnimalType'], aggfunc = 'count'))
+
+df = func.create_dummies(df,'no_colours') #drop 3rd dummy since perfectly correlated with others?
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
 #only use I can envision for colour would be for likelihood of adoption, with some colours being more likely to be adopted, but can't see any trend
 
