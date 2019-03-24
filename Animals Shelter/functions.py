@@ -101,7 +101,7 @@ def dangerous_breed(row):
 def breed_size(row):
 	'''function to create a column with the breed's size'''
 	giant_list = ['Akita', 'Anatolian Sheepdog','Anatol Shepherd','Bernese Mountain Dog','Bloodhound','Borzoi','Bullmastiff','Great Dane','Great Pyrenees',
-'Great Swiss Mountain Dog','Irish Wolfhound','Kuvasz','Mastiff','Neopolitan Mastiff','Newfoundland','Otter Hound','Rottweiler','Saint Bernard']
+'Great Swiss Mountain Dog','Irish Wolfhound','Kuvasz','Mastiff','Neopolitan Mastiff','Newfoundland','Otterhound','Rottweiler','Saint Bernard']
 	large_list = ['Afghan Hound','Alaskan Malamute','American Foxhound','American Bulldog','Beauceron','Belgian Malinois','Belgian Sheepdog','Belgian Tervuren',
 'Black And Tan Coonhound','Black Russian Terrier','Bouvier Des Flandres','Boxer','Briard','Chesapeake Bay Retriever','Clumber Spaniel','Collie',
 'Curly Coated Retriever','Doberman Pinsch','English Foxhound','English Setter','Flat Coat Retriever','German Shepherd','German Shorthaired Pointer',
@@ -112,13 +112,13 @@ def breed_size(row):
 'Dalmatian','English Springer Spaniel','Field Spaniel','Flat Coated Retriever','Finnish Spitz','Harrier','Ibizan Hound','Irish Terrier',
 'Irish Water Spaniel','Keeshond','Kerry Blue Terrier','Norwegian Elkhound','Nova Scotia Duck Tolling Retriever','Petit Basset Griffon Vendeen',
 'Pharaoh Hound','Pit Bull','Plott Hound','Pointer','Polish Lowland Sheepdog','Portuguese Water Dog','Queensland Heeler','Redbone Coonhound','Redbone Hound','Saluki','Samoyed','Siberian Husky',
-'Soft-Coated Wheaten Terrier','Staffordshire Bull Terrier','Standard Schnauzer','Sussex Spaniel','Vizsla','Welsh Springer Spaniel','Wirehaired Pointing Griffon']
+'Soft Coated Wheaten Terrier','Staffordshire Bull Terrier','Standard Schnauzer','Sussex Spaniel','Vizsla','Welsh Springer Spaniel','Wirehaired Pointing Griffon']
 	small_list = ['American Eskimo','Australian Terrier','Australian Kelpie','Basenji','Beagle',
 'Bedlington Terrier','Bichon Frise','Border Terrier','Boston Terrier','Brussels Griffon','Bruss Griffon','Cairn Terrier','Cardigan Welsh Corgi',
 'Cavalier King Charles Spaniel','Coton de Tulear','Dachshund','Dandie Dinmont Terrier','English Toy Spaniel','Fox Terrier – Smooth',
 'Wire Hair Fox Terrier','French Bulldog','German Pinscher','Glen Imaal Terrier','Jack Russell Terrier','Lhasa Apso','Lakeland Terrier','Manchester Terrier (Standard)',
 'Manchester Terrier','Miniature',' Miniature Poodle','Norfolk Terrier','Norwich Terrier','Pug','Puli','Pembroke Welsh Corgi','Rat Terrier','Schipperke','Scottish Terrier','Sealyham Terrier','Shetland Sheepdog','Shiba Inu',
-'Shih Tzu','Silky Terrier','Skye Terrier','Soft Coated Wheaten Terrier','Staffordshire','Tibetan Spaniel','Tibetan Terrier','Welsh Terrier','West Highland','Whippet']
+'Shih Tzu','Silky Terrier','Skye Terrier','Staffordshire','Tibetan Spaniel','Tibetan Terrier','Welsh Terrier','West Highland','Whippet']
 	toy_list = ['Affenpinscher','Chihuahua','Chinese Crested','Italian Greyhound','Japanese Chin','Maltese','Manchester Terrier (Toy)','Papillon','Pekingese','Pomeranian',' Toy Poodle','Toy Fox Terrier','Yorkshire Terrier']
 	if any(i in str(row) for i in giant_list):
 		val = 'giant'
@@ -130,6 +130,39 @@ def breed_size(row):
 		val = 'small'
 	elif any(i in str(row) for i in toy_list):
 		val = 'toy'
+	else:
+		val = 'other'
+	return val
+
+def breed_intelligence(row):
+	'''function to create a column with the breed's size'''
+	bright_list = ['Border Collie','Poodle','German Shepherd Dog','Golden Retriever','Doberman Pinscher','Shetland Sheepdog','Labrador Retriever','Papillon','Rottweiler','Australian Cattle Dog','German Shepherd']
+	excellent_list = ['Catahoula','Black Mouth Cur','Pembroke Welsh Corgi','Miniature Schnauzer','English Springer Spaniel','Belgian Shepherd Dog (Tervuren)','Pit Bull',
+'Schipperke','Belgian Sheepdog','Collie','Keeshond','German Shorthaired Pointer','Flat Coat Retriever','English Cocker Spaniel','Standard Schnauzer','Brittany','Cocker Spaniel',
+'Weimaraner','Belgian Malinois','Bernese Mountain Dog','Pomeranian','Irish Water Spaniel','Vizsla','Cardigan Welsh Corgi']
+	above_avg_list = ['Doberman Pinsch','Anatol Shepherd','Australian Kelpie','Chesapeake Bay Retriever','Puli','Yorkshire Terrier','Giant Schnauzer','Portuguese Water Dog','Airedale Terrier','Bouvier des Flandres','Border Terrier',
+'Briard','Welsh Springer Spaniel','Australian Shepherd','Manchester Terrier','Samoyed','Field Spaniel','Newfoundland','Australian Terrier','American Staffordshire Terrier',
+'Gordon Setter','Bearded Collie','Cairn Terrier','Kerry Blue Terrier','Irish Setter','Norwegian Elkhound','Affenpinscher',
+'Australian Silky Terrier','Miniature Pinscher','English Setter','Pharaoh Hound','Clumber Spaniel','Norwich Terrier','Dalmatian']
+	avg_list = ['Rat Terrier','Blue Lacy','Soft Coated Wheaten Terrier','Bedlington Terrier','Smooth Fox Terrier','Curly Coated Retriever','Irish Wolfhound','Kuvasz','Australian Shepherd','Saluki','Finnish Spitz','Pointer',
+'Cavalier King Charles Spaniel','German Wirehaired Pointer','Black/Tan Hound','Black and Tan Coonhound','American Water Spaniel','Siberian Husky','Bichon Frise','Havanese','King Charles Spaniel','Tibetan Spaniel','English Foxhound',
+'Otterhound','Jack Russell Terrier','American Foxhound','Greyhound','Wirehaired Pointing Griffon','West Highland White Terrier','Scottish Deerhound','Boxer','Great Dane','Dachshund','Shiba Inu',
+'Staffordshire Bull Terrier','Alaskan Malamute','Whippet','Chinese Shar Pei','Wire Fox Terrier','Rhodesian Ridgeback','Ibizan Hound','Welsh Terrier','Irish Terrier','Boston Terrier','Akita']
+	fair_list = ['Skye Terrier','Norfolk Terrier','Sealyham Terrier','Pug','French Bulldog','Griffon Bruxellois','Maltese','Italian Greyhound','Coton de Tulear','Chinese Crested','Dandie Dinmont Terrier',
+'Petit Basset Griffon Vendéen','Tibetan Terrier','Japanese Chin','Lakeland Terrier','Old English Sheepdog','Great Pyrenees','Scottish Terrier','Saint Bernard','Bull Terrier','Chihuahua','Lhasa Apso','Bullmastiff']
+	lowest_list = ['Shih Tzu','Basset Hound','Mastiff','Beagle','Pekingese','Bloodhound','Borzoi','Chow Chow','Bulldog','Basenji','Afghan Hound']
+	if any(i in str(row) for i in bright_list):
+		val = 'bright'
+	elif any(i in str(row) for i in excellent_list):
+		val = 'excellent'
+	elif any(i in str(row) for i in above_avg_list):
+		val = 'above average'
+	elif any(i in str(row) for i in avg_list):
+		val = 'average'
+	elif any(i in str(row) for i in fair_list):
+		val = 'fair'
+	elif any(i in str(row) for i in lowest_list):
+		val = 'lowest'
 	else:
 		val = 'other'
 	return val
