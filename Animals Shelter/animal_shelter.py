@@ -48,11 +48,12 @@ print(pd.pivot_table(df,values=['age'],columns = ['OutcomeType'], aggfunc = [min
 df['pure_mix'] = df['Breed'].apply(func.pure_mix,1)
 df['dangerous'] = df['Breed'].apply(func.dangerous_breed,1)
 df['size'] = df['Breed'].apply(func.breed_size,1)
-print(pd.pivot_table(df,index=['dangerous','size'], columns = ['AnimalType'], aggfunc = 'count'))
+df['intelligence'] = df['Breed'].apply(func.breed_intelligence,1)
+print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfunc = 'count'))
 
-#can't find a good size list for cats; breed info will be very different based on animal type; should classify separately?
+#can't find a good size and intelligence list for cats; breed info will be very different based on animal type; should classify separately?
 #should we do a var for hair length for cats? Hypoallergenic breeds?
-#list for dogs still incomplete, but covering most frequent breeds
+#size and intelligence list for dogs still incomplete, but covering most frequent breeds (better for size)
 
 
 
