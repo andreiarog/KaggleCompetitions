@@ -1,5 +1,6 @@
 #functions
 import pandas as pd
+import numpy as np
 
 def column_split(df,column,sep,n,new_col):
 	'''function to create new columns from the original one when 2 or more attributes are stored in the same column, returns the new dataframe'''
@@ -11,41 +12,70 @@ def column_split(df,column,sep,n,new_col):
 	return df
 
 def create_dummies(df,column_name):
-    """Create Dummy Columns (One Hot Encoding) from a single Column
+	"""Create Dummy Columns (One Hot Encoding) from a single Column
 
-    Usage
-    ------
-    train = create_dummies(train,"Age")
-    """
-    dummies = pd.get_dummies(df[column_name],prefix=column_name)
-    df = pd.concat([df,dummies],axis=1)
-    return df
+	Usage
+	------
+	train = create_dummies(train,"Age")
+	"""
+	dummies = pd.get_dummies(df[column_name],prefix=column_name)
+	df = pd.concat([df,dummies],axis=1)
+	return df
 	
 def normalize(df,column_name, mode):
-    """Normalize Continuous Columns 
+	"""Normalize Continuous Columns 
 
-    Usage
-    ------
-    train = create_dummies(train,"Age")
-    """
-    if (mode=="n"):
-        column=df[column_name]
-        new="{}_norm".format(column_name)
-        df[new]=(column-column.min())/(column.max()-column.min())
-        df[column_name]=df[new]
-        df=df.drop([new], axis=1)
-    if (mode=="z"):
-        column=df[column_name]
-        new="{}_norm".format(column_name)
-        avg=column.mean()
-        var=df.loc[:,column_name].var()
-        df[new]=(column-avg)/var
-        df[column_name]=df[new]
-        df=df.drop([new], axis=1)
-        
-    
-    return df
+	Usage
+	------
+	train = create_dummies(train,"Age")
+	"""
+	if (mode=="n"):
+		column=df[column_name]
+		new="{}_norm".format(column_name)
+		df[new]=(column-column.min())/(column.max()-column.min())
+		df[column_name]=df[new]
+		df=df.drop([new], axis=1)
+	if (mode=="z"):
+		column=df[column_name]
+		new="{}_norm".format(column_name)
+		avg=column.mean()
+		var=df.loc[:,column_name].var()
+		df[new]=(column-avg)/var
+		df[column_name]=df[new]
+		df=df.drop([new], axis=1)
+		
 	
+	return df
+	
+def common_value(col,pct):
+	'''function to identify common and uncommon values of a column'''
+	
+	#The frequency of each name is stored and a minimum counting is defined as 90 percentile of names sorted (it's 6 times)
+	countings = col.value_counts()	
+	countings_values = col.value_counts().tolist()
+	minimum_counting = np.percentile(countings_values, pct, axis=0)
+	
+	#A new column is created with names having a frequency higher than 90 percentile defined previously
+	new_col = np.where((countings[col]>= minimum_counting),1, 0)
+	
+	return new_col
+
+def process_name(dataset): #needs to be tested
+
+	df = dataset.copy()
+	
+	#Missing names are labeled with Unknown and a new column is created 
+	df["Name"] = df["Name"].fillna("Unknown")
+	
+	df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
+	
+	df['Common_Name'] = common_value(df['Name'],90)
+	
+	#Unknown names are removed from common names
+	df["Common_Name"] = np.where((df['Name']== "Unknown"),0, df['Common_Name'])
+	
+	return df
+
 def sex_int(row):
 	'''function to rename as Intervention all animals that were either neutered or spayed'''
 	if 'Unknown' in str(row):
@@ -176,6 +206,11 @@ def breed_colour(row):
 	else:
 		val = 'unicolour'
 	return val
+
+#write function to process colour name - when 'Color' has a '/' then save each component in a variable and re-write colour in alphabetical order separated by the '/'; if 2 vars equal then write just 1 without '/'
+#def process_colour(row):
+#	'''function to process colour names'''
+	
 	
 def unknown_value(row):
 	'''function to convert nulls/unknown to unknown'''
@@ -189,46 +224,73 @@ def unknown_value(row):
 
 #date functions	
 def extract_timeOfDay(df):
-    conditions = [
-    (df['HourTime'] >= 6) & (df['HourTime'] <= 11),
-    (df['HourTime'] >= 12) & (df['HourTime'] <= 18),
-    (df['HourTime'] >= 19),
-    (df['HourTime'] <= 5)]
-    
-    choices = ['Morning', 'Afternoon', 'Evening', 'Evening']
-    
-    df['TimeOfDay'] = np.select(conditions, choices, default='UnknownTimeOfDay')
-    
-    return df
+	conditions = [
+	(df['HourTime'] >= 6) & (df['HourTime'] <= 11),
+	(df['HourTime'] >= 12) & (df['HourTime'] <= 18),
+	(df['HourTime'] >= 19),
+	(df['HourTime'] <= 5)]
+	
+	choices = ['Morning', 'Afternoon', 'Evening', 'Evening']
+	
+	df['TimeOfDay'] = np.select(conditions, choices, default='UnknownTimeOfDay')
+	
+	return df
 
 def transform_cyclic_attributes(df):
-    df['Hour_sin'] = np.sin(df['HourTime']*(2.*np.pi/24))
-    df['Hour_cos'] = np.cos(df['HourTime']*(2.*np.pi/24))
-    df['Month_sin'] = np.sin((df['MonthTime']-1)*(2.*np.pi/12))  #remove 1 to start at month 0
-    df['Month_cos'] = np.cos((df['MonthTime']-1)*(2.*np.pi/12))
-    df['WeekDay_sin'] = np.sin((df['WeekDay'])*(2.*np.pi/7))
-    df['WeekDay_cos'] = np.cos((df['WeekDay'])*(2.*np.pi/7))
-    
-    return df
+	df['Hour_sin'] = np.sin(df['HourTime']*(2.*np.pi/24))
+	df['Hour_cos'] = np.cos(df['HourTime']*(2.*np.pi/24))
+	df['Month_sin'] = np.sin((df['MonthTime']-1)*(2.*np.pi/12))  #remove 1 to start at month 0
+	df['Month_cos'] = np.cos((df['MonthTime']-1)*(2.*np.pi/12))
+	df['WeekDay_sin'] = np.sin((df['WeekDay'])*(2.*np.pi/7))
+	df['WeekDay_cos'] = np.cos((df['WeekDay'])*(2.*np.pi/7))
+	
+	return df
 	
 def extract_date_attributes(df):
-    df['Date'] = pd.to_datetime(df['DateTime'], format='%Y-%m-%d %H:%M:%S', utc=True)
-    df.set_index('Date', inplace=True)
-    df.index = df.index.round('H')
-    
-    df["DayTime"] = df.index.day   #not important as feature, just as condition of Christmas time
-    df["MonthTime"] = df.index.month
-    df["YearTime"] = df.index.year
-    df["HourTime"] = df.index.hour
-    df["WeekDay"] = df.index.weekday #Monday=0, Sunday=6
-    df['Weekend'] = np.where((df["WeekDay"] >= 5), '1', '0')
-    df["Christmas"] = np.where((df["MonthTime"] == 12) & (df["DayTime"] >= 15), '1', (np.where(df["MonthTime"] == 1, '1', '0')))
-    df["Summer"] = np.where((df["MonthTime"] >= 6) & (df["MonthTime"]<=9), '1', '0')
-    df["Winter"] = np.where((df["MonthTime"] >= 11) & (df["MonthTime"]<=2), '1', '0')
-   
-    df = transform_cyclic_attributes(df)
-    df = extract_timeOfDay(df)
-    
-    return df
+	df['Date'] = pd.to_datetime(df['DateTime'], format='%Y-%m-%d %H:%M:%S', utc=True)
+	df.set_index('Date', inplace=True)
+	df.index = df.index.round('H')
 	
+	df["DayTime"] = df.index.day   #not important as feature, just as condition of Christmas time
+	df["MonthTime"] = df.index.month
+	df["YearTime"] = df.index.year
+	df["HourTime"] = df.index.hour
+	df["WeekDay"] = df.index.weekday #Monday=0, Sunday=6
+	df['Weekend'] = np.where((df["WeekDay"] >= 5), '1', '0')
+	df["Christmas"] = np.where((df["MonthTime"] == 12) & (df["DayTime"] >= 15), '1', (np.where(df["MonthTime"] == 1, '1', '0')))
+	df["Summer"] = np.where((df["MonthTime"] >= 6) & (df["MonthTime"]<=9), '1', '0')
+	df["Winter"] = np.where((df["MonthTime"] >= 11) & (df["MonthTime"]<=2), '1', '0')
+   
+	df = transform_cyclic_attributes(df)
+	df = extract_timeOfDay(df)
+	
+	return df
+	
+def process_date_attributes(dataset):
+	df_original = dataset.copy()
+	df=dataset.copy()
+		
+	df['Date'] = pd.to_datetime(df['DateTime'], format='%Y-%m-%d %H:%M:%S', utc=True)
+	df.set_index('Date', inplace=True)
+	df.index = df.index.round('H')
+		
+	df["DayTime"] = df.index.day   #not important as feature, just as condition of Christmas time
+	df["MonthTime"] = df.index.month
+	df["YearTime"] = df.index.year
+	df["HourTime"] = df.index.hour
+	df["WeekDay"] = df.index.weekday #Monday=0, Sunday=6
+	df['Weekend'] = np.where((df["WeekDay"] >= 5), '1', '0')
+	df["Christmas"] = np.where((df["MonthTime"] == 12) & (df["DayTime"] >= 15), '1', (np.where(df["MonthTime"] == 1, '1', '0')))
+	df["Summer"] = np.where((df["MonthTime"] >= 6) & (df["MonthTime"]<=9), '1', '0')
+	df["Winter"] = np.where((df["MonthTime"] >= 11) & (df["MonthTime"]<=2), '1', '0')
+	   
+	df = transform_cyclic_attributes(df)
+	df = extract_timeOfDay(df)
+		
+	#date_attributes = df[['DayTime', 'Month_sin','Month_cos','YearTime','Hour_sin', 'Hour_cos','WeekDay_sin','WeekDay_cos','Weekend', 'Christmas', 'Summer','Winter']]
+	#date_attributes=date_attributes.reset_index()
+	#df = pd.concat([df_original,date_attributes],axis=1)
+	df=df.reset_index()
+	df=df.drop(['Date','DateTime'], axis=1)
+	return df
 
