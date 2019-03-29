@@ -1,7 +1,7 @@
 #imports
 import pandas as pd
 import numpy as np
-import functions as func #file contained the user created functions
+import functions as func #file containing the user created functions
 
 #read csv files and create dataframes
 train = pd.read_csv('train.csv')
@@ -57,19 +57,19 @@ print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfun
 
 #Colour
 
-df['no_colours'] = df['Color'].apply(func.breed_colour,1)
+df['Colour'] = df['Color'].apply(func.process_colour,1)
+df['no_colours'] = df['Colour'].apply(func.breed_colour,1)
 print(pd.pivot_table(df,index=['no_colours'], columns = ['AnimalType'], aggfunc = 'count'))
 
 df = func.create_dummies(df,'no_colours') #drop 3rd dummy since perfectly correlated with others?
 
-df['common_colour'] = func.common_value(df['Color'],95) #analyse parameter better
+df['common_colour'] = func.common_value(df['Colour'],95) #considers 16 most common colours has common (more than 550 occurrences)
 print(df['common_colour'])
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
-#only use I can envision for colour would be for likelihood of adoption, with some colours being more likely to be adopted, but can't see any trend
 
 #convert all categorical variables to dummy using function already created
 
 #'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
-#df.to_csv('dataframe.csv')
-print(df)
+df.to_csv('dataframe.csv')
+#print(df)
 
