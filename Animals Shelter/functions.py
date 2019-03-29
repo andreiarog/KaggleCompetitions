@@ -207,10 +207,19 @@ def breed_colour(row):
 		val = 'unicolour'
 	return val
 
-#write function to process colour name - when 'Color' has a '/' then save each component in a variable and re-write colour in alphabetical order separated by the '/'; if 2 vars equal then write just 1 without '/'
-#def process_colour(row):
-#	'''function to process colour names'''
-	
+def process_colour(row):
+	'''function to process colour names'''
+	if '/' in str(row):
+		colours = str(row).split('/')
+		if colours[0] == colours[1]:
+			val=colours[0]
+		elif colours[0] > colours[1]:
+			val=colours[0]+'/'+colours[1]
+		else:
+			val=colours[1]+'/'+colours[0]
+	else:
+		val = str(row)
+	return val
 	
 def unknown_value(row):
 	'''function to convert nulls/unknown to unknown'''
