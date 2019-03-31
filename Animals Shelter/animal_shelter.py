@@ -25,7 +25,6 @@ df['sex_intervention']= df['sex_intervention'].apply(func.unknown_value,1).apply
 
 df = func.create_dummies(df,'sex')
 df = func.create_dummies(df,'sex_intervention')
-#drop 3rd dummy since perfectly correlated with others?
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
@@ -33,7 +32,6 @@ df = func.create_dummies(df,'sex_intervention')
 #age
 df['age'] = df['AgeuponOutcome'].apply(func.age_standard,1)
 df['age_known']=df['age'].apply(func.unknown_age,1)
-#0 days consider unknown age (? can't remember what we agreed)
 
 print(pd.pivot_table(df,index=['age_known'], columns = ['OutcomeType'], aggfunc = 'count'))
 #there are very few animals with unknown age. Exclude those with unknown? Or replace age by mean? Which mean (overall, class, etc)?
@@ -61,13 +59,14 @@ df['Colour'] = df['Color'].apply(func.process_colour,1)
 df['no_colours'] = df['Colour'].apply(func.breed_colour,1)
 print(pd.pivot_table(df,index=['no_colours'], columns = ['AnimalType'], aggfunc = 'count'))
 
-df = func.create_dummies(df,'no_colours') #drop 3rd dummy since perfectly correlated with others?
+df = func.create_dummies(df,'no_colours')
 
-df['common_colour'] = func.common_value(df['Colour'],95) #considers 16 most common colours has common (more than 550 occurrences)
+df['common_colour'] = func.common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
+#build different vars for different percentile values (90,92,95,98)
 print(df['common_colour'])
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
 
-#convert all categorical variables to dummy using function already created
+#convert all categorical variables to dummy using function already created - eliminate one of the dummies generated for all variables
 
 #'pre_processing' function that applies all final changes that we decide and then apply this to both train and test
 df.to_csv('dataframe.csv')
