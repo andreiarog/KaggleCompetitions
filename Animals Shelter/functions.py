@@ -103,7 +103,7 @@ def age_standard(row):
 
 def unknown_age(row):
 	'''function to convert nulls/unknown to unknown'''
-	if row > 0:
+	if row >= 0:
 		val = 'Known'
 	else:
 		val = 'Unknown'
