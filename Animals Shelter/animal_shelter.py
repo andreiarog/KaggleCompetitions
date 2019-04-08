@@ -32,9 +32,10 @@ df = func.create_dummies(df,'sex_intervention')
 #age
 df['age'] = df['AgeuponOutcome'].apply(func.age_standard,1)
 df['age_known']=df['age'].apply(func.unknown_age,1)
-
-print(pd.pivot_table(df,index=['age_known'], columns = ['OutcomeType'], aggfunc = 'count'))
-#there are very few animals with unknown age. Exclude those with unknown? Or replace age by mean? Which mean (overall, class, etc)?
+#replace unknown by mean per animal type 
+df_trans = (df.groupby('AnimalType')).transform(lambda x: x.fillna(round(x.mean()), inplace = False)) #not working, read documentation to understand better
+df['age'] = df_trans['age']
+df['age_bins']= df['age'].apply(func.age_bins,1)
 
 print(pd.pivot_table(df,values=['age'],columns = ['OutcomeType'], aggfunc = [min,max,np.mean]))
 #there are no adoptions of animals younger than a month
@@ -47,7 +48,9 @@ df['pure_mix'] = df['Breed'].apply(func.pure_mix,1)
 df['dangerous'] = df['Breed'].apply(func.dangerous_breed,1)
 df['size'] = df['Breed'].apply(func.breed_size,1)
 df['intelligence'] = df['Breed'].apply(func.breed_intelligence,1)
-print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfunc = 'count'))
+df['hypoaller'] = df['Breed'].apply(func.breed_hypoaller,1)
+
+#print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfunc = 'count'))
 
 #can't find a good size and intelligence list for cats; breed info will be very different based on animal type; should classify separately?
 #should we do a var for hair length for cats? Hypoallergenic breeds?
@@ -57,13 +60,13 @@ print(pd.pivot_table(df,index=['intelligence'], columns = ['AnimalType'], aggfun
 
 df['Colour'] = df['Color'].apply(func.process_colour,1)
 df['no_colours'] = df['Colour'].apply(func.breed_colour,1)
-print(pd.pivot_table(df,index=['no_colours'], columns = ['AnimalType'], aggfunc = 'count'))
+#print(pd.pivot_table(df,index=['no_colours'], columns = ['AnimalType'], aggfunc = 'count'))
 
 df = func.create_dummies(df,'no_colours')
 
 df['common_colour'] = func.common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
 #build different vars for different percentile values (90,92,95,98)
-print(df['common_colour'])
+
 #unbalanced attribute, with Black and Black/White having considerably more observations than other colours
 
 #convert all categorical variables to dummy using function already created - eliminate one of the dummies generated for all variables
