@@ -109,6 +109,28 @@ def unknown_age(row):
 		val = 'Unknown'
 	return val
 
+def age_bins(row):
+	'''function to build age bins (based on days); apply only after replacing nulls by mean'''
+	if row <= 30:
+		val = '<= 1 month'
+	elif row <= 61:
+		val = '>1-2 months'
+	elif row <= 243:
+		val = '>2-8 months'
+	elif row < 730:
+		val = '9 months to 1 year'	
+	elif row < 1095:
+		val = '2 years'		
+	elif row < 1825:
+		val = '3-4 years'	
+	elif row < 2920:
+		val = '5-7 years'
+	elif row < 4015:
+		val = '8-10 years'			
+	else:
+		val = '>10 years'
+	return val
+
 def pure_mix(row):
 	'''function to create a column that flags if an animal is pure breed or mix'''
 	if 'Mix' in str(row):
@@ -195,6 +217,19 @@ def breed_intelligence(row):
 		val = 'lowest'
 	else:
 		val = 'other'
+	return val
+	
+def breed_hypoaller(row):
+	'''function to flag hypoallergenic breeds'''
+	list = ['Balinese-Javanese','Cornish Rex','Devon Rex','Sphynx','Poodle','Yorkshire Terrier','Miniature Schnauzer','Shih Tzu','Havanese','Maltese','West Highland White Terrier',
+	'Bichon Frise','Soft Coated Wheaten Terrier','Portuguese Water Dog','Airedale Terrier','Samoyed','Scottish Terrier','Wirehaired Pointing Griffon','Cairn Terrier','Italian Greyhound','Chinese Crested','Giant Schnauzer','Coton De Tulear','Bouvier des Flandres',
+	'Standard Schnauzer', 'Border Terrier', 'Afghan Hound', 'Brussels Griffon', 'Wire Fox Terrier', 'Tibetan Terrier', 'Norwich Terrier', 'Silky Terrier', 'Welsh Terrier', 'Irish Terrier', 'Lagotto Romagnolo',
+	'Norfolk Terrier', 'Kerry Blue Terrier', 'Australian Terrier', 'Lakeland Terrier', 'Puli', 'Xoloitzcuintli', 'Affenpinscher', 'Spanish Water Dog', 'Sealyham Terrier', 'Bedlington Terrier', 'Irish Water Spaniel',
+	'Lowchen', 'Polish Lowland Sheepdog', 'Bergamasco', 'Dandie Dinmont Terrier', 'Cesky Terrier', 'Toy Poodle', 'Barbet', 'Peruvian Inca Orchid', 'Bolognese dog', 'Kyi-Leo', 'Shichon', 'Mountain Cur', 'Russian Tsvetnaya Bolonka']
+	if any(i in str(row) for i in list):
+		val = 1
+	else:
+		val = 0
 	return val
 	
 def breed_colour(row):
