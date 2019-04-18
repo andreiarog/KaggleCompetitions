@@ -3,8 +3,12 @@ import pandas as pd
 import numpy as np
 
 def pre_process(dataset):
-
-    df=dataset.copy()       
+        
+    df=dataset.copy()   
+    
+    if 'OutcomeSubtype' in df.columns:
+        df=df.drop(['OutcomeSubtype'], axis=1)
+    
     df=process_date_attributes(df)
     df=process_name(df)
     df=process_sex(df)
@@ -16,8 +20,15 @@ def pre_process(dataset):
     for column in toDummy:
         df = create_dummies(df, column)
     
-    df=df.drop([
-        
+    df=df.drop(['AnimalType','AnimalType_Cat','TimeOfDay_Morning', 'TimeOfDay'], axis=1)
+    
+    to_numeric = ['Winter', 'Christmas', 'Summer', 'Weekend']
+    for column in to_numeric:
+        df[column] = df[column].convert_objects(convert_numeric=True)
+    
+    
+    
+    
     return df
 
 def column_split(df,column,sep,n,new_col):
@@ -80,19 +91,25 @@ def common_value(col,pct):
 
 def process_name(dataset): #needs to be tested
 
-	df = dataset.copy()
-	
-	#Missing names are labeled with Unknown and a new column is created 
-	df["Name"] = df["Name"].fillna("Unknown")
-	
-	df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
-	
-	df['Common_Name'] = common_value(df['Name'],95)
-	
-	#Unknown names are removed from common names
-	df["Common_Name"] = np.where((df['Name']== "Unknown"),0, df['Common_Name'])
-	
-	return df
+    df = dataset.copy()
+    df["Name"] = df["Name"].fillna("Unknown")
+    
+    #Missing names are labeled with Unknown and a new column is created 
+    df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
+    
+    df['Common_Name_85'] = common_value(df['Name'],85)
+    df['Common_Name_90'] = common_value(df['Name'],90)
+    df['Common_Name_92'] = common_value(df['Name'],92)
+    df['Common_Name_95'] = common_value(df['Name'],95)
+    
+    #Unknown names are removed from common names
+    df["Common_Name_85"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_85'])
+    df["Common_Name_90"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_90'])
+    df["Common_Name_92"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_92'])
+    df["Common_Name_95"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_95'])
+    df=df.drop(['Name'], axis=1)
+        
+    return df
 
 def sex_int(row):
 	'''function to rename as Intervention all animals that were either neutered or spayed'''
@@ -342,9 +359,9 @@ def process_date_attributes(dataset):
 	df["HourTime"] = df.index.hour
 	df["WeekDay"] = df.index.weekday #Monday=0, Sunday=6
 	df['Weekend'] = np.where((df["WeekDay"] >= 5), '1', '0')
-	df["Christmas"] = np.where((df["MonthTime"] == 12) & (df["DayTime"] >= 15), '1', (np.where(df["MonthTime"] == 1, '1', '0')))
+	df["Christmas"] = np.where((df["MonthTime"] == 12) & (df["DayTime"] >= 15), '1', (np.where((df["MonthTime"] == 1) & (df["DayTime"]<=10), '1', '0')))
 	df["Summer"] = np.where((df["MonthTime"] >= 6) & (df["MonthTime"]<=9), '1', '0')
-	df["Winter"] = np.where((df["MonthTime"] >= 11) & (df["MonthTime"]<=2), '1', '0')
+	df["Winter"] = np.where((df["MonthTime"] >= 12),1,(np.where((df["MonthTime"]<=2), '1', '0')))
 	   
 	df = transform_cyclic_attributes(df)
 	df = extract_timeOfDay(df)
@@ -353,7 +370,7 @@ def process_date_attributes(dataset):
 	#date_attributes=date_attributes.reset_index()
 	#df = pd.concat([df_original,date_attributes],axis=1)
 	df=df.reset_index()
-	df=df.drop(['Date','DateTime'], axis=1) #why not dropping other vars like sin and cos?
+	df=df.drop(['Date','DateTime','DayTime', 'HourTime', 'WeekDay','MonthTime'], axis=1) #why not dropping other vars like sin and cos?
 	return df
 
 def process_sex(df):
@@ -373,7 +390,8 @@ def process_age(df):
 	df['age'] = df_trans['age']
 	df['age_bins']= df['age'].apply(age_bins,1)
 	df = create_dummies(df,'age_bins')
-	df=df.drop(['AgeuponOutcome','age_bins','age_bins_>10 years'], axis=1) 
+	df=df.drop(['AgeuponOutcome','age_bins','age_bins_>10 years','age_known'], axis=1) 
+    
 	return df
 	
 def process_breed(df):
@@ -385,7 +403,7 @@ def process_breed(df):
 	df = create_dummies(df,'size')
 	df = create_dummies(df,'intelligence')
 	#build dummy for the breed itself? Or not even worth including it in feature selection?
-	df=df.drop(['size','intelligence','size_other','intelligence_other'], axis=1) 
+	df=df.drop(['Breed','size','intelligence','size_other','intelligence_other'], axis=1) 
 	return df
 	
 def process_colour(df):
@@ -397,6 +415,6 @@ def process_colour(df):
 	df['common_colour_95'] = common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
 	df['common_colour_98'] = common_value(df['Colour'],98)
 	#build dummy for the colour itself? Or not even worth including it in feature selection?
-	df=df.drop(['Color','no_colours','no_colours_unicolour'], axis=1) 
+	df=df.drop(['Color', 'Colour','no_colours','no_colours_unicolour'], axis=1) 
 
 	return df
