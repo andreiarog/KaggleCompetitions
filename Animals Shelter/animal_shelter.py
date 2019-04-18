@@ -17,12 +17,8 @@ test = pd.read_csv('test.csv')
 #main
 #.apply allows to apply functions to each row or column
 
-df=func.process_date_attributes(train)
-df=func.process_name(df)
-df=func.process_sex(df)
-df=func.process_age(df)
-df=func.process_breed(df)
-df=func.process_colour(df)
+df = func.pre_process(train)
+
 #some dummies still missing
 #need to drop AnimalID or just exclude it in models?
 print(df)
