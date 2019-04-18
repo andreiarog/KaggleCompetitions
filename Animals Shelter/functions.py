@@ -69,7 +69,7 @@ def process_name(dataset): #needs to be tested
 	
 	df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
 	
-	df['Common_Name'] = common_value(df['Name'],90)
+	df['Common_Name'] = common_value(df['Name'],95)
 	
 	#Unknown names are removed from common names
 	df["Common_Name"] = np.where((df['Name']== "Unknown"),0, df['Common_Name'])
