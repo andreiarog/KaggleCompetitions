@@ -6,23 +6,19 @@ import functions as func #file containing the user created functions
 #read csv files and create dataframes
 train = pd.read_csv('train.csv')
 test = pd.read_csv('test.csv')
-
-#print(train)
-
-#comments to Andreia
-#Name field might be relevant when NaN (convert to binary 'known_name') - higher probability of death or euthanasia (?) due to poorer condition when arriving at shelter
-#0 probability of return_to_owner (? check no. NaN name observations per value of outcome)
-#check dog/cat balance
 	
 #main
 #.apply allows to apply functions to each row or column
 
-df = func.pre_process(train)
+df=func.pre_process(train)
+df.to_csv('dataframe.csv') 
+features_select = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType')
+print(features_select)
 
-#some dummies still missing
-#need to drop AnimalID or just exclude it in models?
-print(df)
-df.to_csv('dataframe.csv') #are we happy with the final dataframe?
+
+#feature selection comments:
+#age appears above all age bins except 1, even though in general age bins are good features, use age?
+#hour sin and cos have good ranking, how to use them?
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
