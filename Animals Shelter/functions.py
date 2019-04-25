@@ -1,6 +1,8 @@
 #functions
 import pandas as pd
 import numpy as np
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
 
 def pre_process(dataset):
         
@@ -25,9 +27,6 @@ def pre_process(dataset):
     to_numeric = ['Winter', 'Christmas', 'Summer', 'Weekend']
     for column in to_numeric:
         df[column] = df[column].convert_objects(convert_numeric=True)
-    
-    
-    
     
     return df
 
@@ -374,6 +373,7 @@ def process_date_attributes(dataset):
 	return df
 
 def process_sex(df):
+	'''function to process the sex attribute'''
 	df = column_split(df, 'SexuponOutcome', ' ', 2, ['sex_intervention', 'sex'])
 	df['sex']= df['sex'].apply(unknown_value,1)
 	df['sex_intervention']= df['sex_intervention'].apply(unknown_value,1).apply(sex_int,1)
@@ -384,6 +384,7 @@ def process_sex(df):
 	return df
 	
 def process_age(df):
+	'''function to process the age attribute'''
 	df['age'] = df['AgeuponOutcome'].apply(age_standard,1)
 	df['age_known']=df['age'].apply(known_age,1)
 	df_trans = (df.groupby('AnimalType')).transform(lambda x: x.fillna(round(x.mean()), inplace = False)) 
@@ -395,6 +396,7 @@ def process_age(df):
 	return df
 	
 def process_breed(df):
+	'''function to process the breed attribute'''
 	df['pure'] = df['Breed'].apply(pure,1)
 	df['dangerous'] = df['Breed'].apply(dangerous_breed,1)
 	df['size'] = df['Breed'].apply(breed_size,1)
@@ -402,11 +404,11 @@ def process_breed(df):
 	df['hypoaller'] = df['Breed'].apply(breed_hypoaller,1)
 	df = create_dummies(df,'size')
 	df = create_dummies(df,'intelligence')
-	#build dummy for the breed itself? Or not even worth including it in feature selection?
 	df=df.drop(['Breed','size','intelligence','size_other','intelligence_other'], axis=1) 
 	return df
 	
 def process_colour(df):
+	'''function to process the colour attribute'''
 	df['Colour'] = df['Color'].apply(order_colour,1)
 	df['no_colours'] = df['Colour'].apply(breed_colour,1)
 	df = create_dummies(df,'no_colours')
@@ -414,7 +416,21 @@ def process_colour(df):
 	df['common_colour_92'] = common_value(df['Colour'],92)
 	df['common_colour_95'] = common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
 	df['common_colour_98'] = common_value(df['Colour'],98)
-	#build dummy for the colour itself? Or not even worth including it in feature selection?
 	df=df.drop(['Color', 'Colour','no_colours','no_colours_unicolour'], axis=1) 
 
 	return df
+	
+def feature_selection(df,tgt):
+	'''function to do feature selection for the target specified by tgt'''
+	target = df[tgt]
+	features = df.drop([tgt], axis=1)
+	bestfeatures = SelectKBest(score_func=f_classif, k=10)
+	fit = bestfeatures.fit(features,target)
+	dfscores = pd.DataFrame(fit.scores_)
+	dfcolumns = pd.DataFrame(features.columns)
+	#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
+	featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+	featureScores.columns = ['Features','Score']  #naming the dataframe columns
+	featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
+	
+	return featureScores
