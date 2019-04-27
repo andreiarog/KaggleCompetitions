@@ -2,6 +2,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectFdr
+from sklearn.feature_selection import SelectFwe
+from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 
 def pre_process(dataset):
@@ -391,7 +394,7 @@ def process_age(df):
 	df['age'] = df_trans['age']
 	df['age_bins']= df['age'].apply(age_bins,1)
 	df = create_dummies(df,'age_bins')
-	df=df.drop(['AgeuponOutcome','age_bins','age_bins_>10 years','age_known'], axis=1) 
+	df= df.drop(['AgeuponOutcome','age_bins','age_bins_>10 years','age_known'], axis=1) 
     
 	return df
 	
@@ -420,17 +423,53 @@ def process_colour(df):
 
 	return df
 	
-def feature_selection(df,tgt):
-	'''function to do feature selection for the target specified by tgt'''
+def feature_selection(df,tgt,mtd):
+	'''function to do feature selection for the target specified by tgt and using the method specified by mtd'''
 	target = df[tgt]
 	features = df.drop([tgt], axis=1)
-	bestfeatures = SelectKBest(score_func=f_classif, k=10)
-	fit = bestfeatures.fit(features,target)
-	dfscores = pd.DataFrame(fit.scores_)
-	dfcolumns = pd.DataFrame(features.columns)
-	#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
-	featureScores = pd.concat([dfcolumns,dfscores],axis=1)
-	featureScores.columns = ['Features','Score']  #naming the dataframe columns
-	featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
-	
-	return featureScores
+	if mtd == 'KBest':
+		bestfeatures = SelectKBest(score_func=f_classif, k=10)
+		fit = bestfeatures.fit(features,target)
+		dfscores = pd.DataFrame(fit.scores_)
+		dfcolumns = pd.DataFrame(features.columns)
+		#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
+		featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+		featureScores.columns = ['Features','Score']  #naming the dataframe columns
+		featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
+		select_cols = features.columns.values[fit.get_support()] #get_support returns a boolean vector indicating which features (columns' names) were selected
+		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
+	elif mtd == 'Fdr':
+		bestfeatures = SelectFdr(score_func=f_classif, alpha=0.05)
+		fit = bestfeatures.fit(features,target)
+		dfscores = pd.DataFrame(fit.scores_)
+		dfcolumns = pd.DataFrame(features.columns)
+		#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
+		featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+		featureScores.columns = ['Features','Score']  #naming the dataframe columns
+		featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
+		select_cols = features.columns.values[fit.get_support()] #get_support returns a boolean vector indicating which features (columns' names) were selected
+		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
+	elif mtd == 'Fwe':
+		bestfeatures = SelectFwe(score_func=f_classif, alpha=0.05)
+		fit = bestfeatures.fit(features,target)
+		dfscores = pd.DataFrame(fit.scores_)
+		dfcolumns = pd.DataFrame(features.columns)
+		#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
+		featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+		featureScores.columns = ['Features','Score']  #naming the dataframe columns
+		featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
+		select_cols = features.columns.values[fit.get_support()] #get_support returns a boolean vector indicating which features (columns' names) were selected
+		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
+	elif mtd == 'Pct':
+		bestfeatures = SelectPercentile(score_func=f_classif, percentile=20)
+		fit = bestfeatures.fit(features,target)
+		dfscores = pd.DataFrame(fit.scores_)
+		dfcolumns = pd.DataFrame(features.columns)
+		#dfpvalues = pd.DataFrame(fit.pvalues_) #not providing useful insight
+		featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+		featureScores.columns = ['Features','Score']  #naming the dataframe columns
+		featureScores = featureScores.sort_values(by=['Score'],ascending=False) #sort to see most important features at the top
+		select_cols = features.columns.values[fit.get_support()] #get_support returns a boolean vector indicating which features (columns' names) were selected
+		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
+
+	return featureScores #selectfeatures
