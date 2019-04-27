@@ -12,13 +12,25 @@ test = pd.read_csv('test.csv')
 
 df=func.pre_process(train)
 df.to_csv('dataframe.csv') 
-features_select = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType')
-print(features_select)
+features_select_K = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','KBest') #need to concat with class to obtain final dataframe for classification
+#features_select_Fdr = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fdr') #need to concat with class to obtain final dataframe for classification
+#features_select_Fwe = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fwe') #need to concat with class to obtain final dataframe for classification
+#features_select_Pct = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Pct') #need to concat with class to obtain final dataframe for classification
+
+print('KBest:',features_select_K)
+#print('Fdr:',features_select_Fdr)
+#print('Fwe:',features_select_Fwe)
+#print('Fwe:',features_select_Pct)
+#print('KBest:',features_select_K.columns)
+#print('Pct:',features_select_Pct.columns)
 
 
 #feature selection comments:
 #age appears above all age bins except 1, even though in general age bins are good features, use age?
 #hour sin and cos have good ranking, how to use them?
+#all methods provide the same scores: all features are correlated with outcome, but some more strongly, according to scores' order
+#we need to select non-repeated features according to the scores
+#how many features should we select? Just try the methods with different number of features and select best? Also look at other feature selection methods before this
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
