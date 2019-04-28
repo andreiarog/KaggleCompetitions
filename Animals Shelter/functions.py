@@ -473,3 +473,59 @@ def feature_selection(df,tgt,mtd):
 		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
 
 	return featureScores #selectfeatures
+
+def convert(data, to):
+	converted = None
+	if to == 'array':
+		if isinstance(data, np.ndarray):
+			converted = data
+		elif isinstance(data, pd.Series):
+			converted = data.values
+		elif isinstance(data, list):
+			converted = np.array(data)
+		elif isinstance(data, pd.DataFrame):
+			converted = data.as_matrix()
+	elif to == 'list':
+		if isinstance(data, list):
+			converted = data
+		elif isinstance(data, pd.Series):
+			converted = data.values.tolist()
+		elif isinstance(data, np.ndarray):
+			converted = data.tolist()
+	elif to == 'dataframe':
+		if isinstance(data, pd.DataFrame):
+			converted = data
+		elif isinstance(data, np.ndarray):
+			converted = pd.DataFrame(data)
+	else:
+		raise ValueError("Unknown data conversion: {}".format(to))
+	if converted is None:
+		raise TypeError('cannot handle data conversion of type: {} to {}'.format(type(data),to))
+	else:
+		return converted
+		
+def correlation_ratio(categories, measurements):
+	'''	:param categories: list / NumPy ndarray / Pandas Series
+	A sequence of categorical measurements
+	:param measurements: list / NumPy ndarray / Pandas Series
+	A sequence of continuous measurements
+	:return: float
+	in the range of [0,1]'''
+	cat = convert(categories, 'array')
+	measurements = convert(measurements, 'array')
+	fcat, _ = pd.factorize(cat)
+	cat_num = np.max(fcat)+1
+	y_avg_array = np.zeros(cat_num)
+	n_array = np.zeros(cat_num)
+	for i in range(0,cat_num):
+		cat_measures = measurements[np.argwhere(fcat == i).flatten()]
+		n_array[i] = len(cat_measures)
+		y_avg_array[i] = np.average(cat_measures)
+	y_total_avg = np.sum(np.multiply(y_avg_array,n_array))/np.sum(n_array)
+	numerator = np.sum(np.multiply(n_array,np.power(np.subtract(y_avg_array,y_total_avg),2)))
+	denominator = np.sum(np.power(np.subtract(measurements,y_total_avg),2))
+	if numerator == 0:
+		eta = 0.0
+	else:
+		eta = numerator/denominator
+	return eta
