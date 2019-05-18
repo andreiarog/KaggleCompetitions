@@ -60,7 +60,9 @@ plt.show(g)
 #we need to select non-repeated features according to the scores
 #how many features should we select? Just try the methods with different number of features and select best? 
 #think we can check feature importance and impact of using different features when testing classifiers, but maybe not as a pre-step given that the choice will be biased by the specific method being used and is only possible for tree based classifiers
-#look at PCA. Is it worth creating more variables?
+#look at PCA. Is it worth creating more variables? Look at rank of most important features to the principal components to see if it matches information so far
+#final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
+#classifiers: linear SVC, random forest, logistic regression with multinomial distribution
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
