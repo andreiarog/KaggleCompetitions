@@ -8,30 +8,31 @@ from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 
 def pre_process(dataset):
-        
-    df=dataset.copy()   
-    
-    if 'OutcomeSubtype' in df.columns:
-        df=df.drop(['OutcomeSubtype'], axis=1)
-    
-    df=process_date_attributes(df)
-    df=process_name(df)
-    df=process_sex(df)
-    df=process_age(df)
-    df=process_breed(df)
-    df=process_colour(df)
+		
+	df=dataset.copy()  
+	df=cat_coat(df)
+	
+	if 'OutcomeSubtype' in df.columns:
+		df=df.drop(['OutcomeSubtype'], axis=1)
+	
+	df=process_date_attributes(df)
+	df=process_name(df)
+	df=process_sex(df)
+	df=process_age(df)
+	df=process_breed(df)
+	df=process_colour(df)
 
-    toDummy=["TimeOfDay", "AnimalType"]
-    for column in toDummy:
-        df = create_dummies(df, column)
-    
-    df=df.drop(['AnimalType','AnimalType_Cat','TimeOfDay_Morning', 'TimeOfDay'], axis=1)
-    
-    to_numeric = ['Winter', 'Christmas', 'Summer', 'Weekend']
-    for column in to_numeric:
-        df[column] = df[column].convert_objects(convert_numeric=True)
-    
-    return df
+	toDummy=["TimeOfDay", "AnimalType"]
+	for column in toDummy:
+		df = create_dummies(df, column)
+	
+	df=df.drop(['AnimalType','AnimalType_Cat','TimeOfDay_Morning', 'TimeOfDay'], axis=1)
+	
+	to_numeric = ['Winter', 'Christmas', 'Summer', 'Weekend']
+	for column in to_numeric:
+		df[column] = df[column].convert_objects(convert_numeric=True)
+	
+	return df
 
 def column_split(df,column,sep,n,new_col):
 	'''function to create new columns from the original one when 2 or more attributes are stored in the same column, returns the new dataframe'''
@@ -93,25 +94,25 @@ def common_value(col,pct):
 
 def process_name(dataset): #needs to be tested
 
-    df = dataset.copy()
-    df["Name"] = df["Name"].fillna("Unknown")
-    
-    #Missing names are labeled with Unknown and a new column is created 
-    df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
-    
-    df['Common_Name_85'] = common_value(df['Name'],85)
-    df['Common_Name_90'] = common_value(df['Name'],90)
-    df['Common_Name_92'] = common_value(df['Name'],92)
-    df['Common_Name_95'] = common_value(df['Name'],95)
-    
-    #Unknown names are removed from common names
-    df["Common_Name_85"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_85'])
-    df["Common_Name_90"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_90'])
-    df["Common_Name_92"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_92'])
-    df["Common_Name_95"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_95'])
-    df=df.drop(['Name'], axis=1)
-        
-    return df
+	df = dataset.copy()
+	df["Name"] = df["Name"].fillna("Unknown")
+	
+	#Missing names are labeled with Unknown and a new column is created 
+	df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
+	
+	df['Common_Name_85'] = common_value(df['Name'],85)
+	df['Common_Name_90'] = common_value(df['Name'],90)
+	df['Common_Name_92'] = common_value(df['Name'],92)
+	df['Common_Name_95'] = common_value(df['Name'],95)
+	
+	#Unknown names are removed from common names
+	df["Common_Name_85"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_85'])
+	df["Common_Name_90"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_90'])
+	df["Common_Name_92"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_92'])
+	df["Common_Name_95"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_95'])
+	df=df.drop(['Name'], axis=1)
+		
+	return df
 
 def sex_int(row):
 	'''function to rename as Intervention all animals that were either neutered or spayed'''
@@ -256,6 +257,13 @@ def breed_intelligence(row):
 		val = 'other'
 	return val
 	
+def cat_coat(df):
+	'''function to create a column with the cat coat'''
+	#import cat coat information from excel file
+	coat = pd.read_excel('cat_coat.xlsx')
+	df = pd.merge(df, coat, how = 'left', on = 'Breed')
+	return df
+
 def breed_hypoaller(row):
 	'''function to flag hypoallergenic breeds'''
 	list = ['Balinese-Javanese','Cornish Rex','Devon Rex','Sphynx','Poodle','Yorkshire Terrier','Miniature Schnauzer','Shih Tzu','Havanese','Maltese','West Highland White Terrier',
@@ -395,7 +403,7 @@ def process_age(df):
 	df['age_bins']= df['age'].apply(age_bins,1)
 	df = create_dummies(df,'age_bins')
 	df= df.drop(['AgeuponOutcome','age_bins','age_bins_>10 years','age_known'], axis=1) 
-    
+	
 	return df
 	
 def process_breed(df):
@@ -405,9 +413,11 @@ def process_breed(df):
 	df['size'] = df['Breed'].apply(breed_size,1)
 	df['intelligence'] = df['Breed'].apply(breed_intelligence,1)
 	df['hypoaller'] = df['Breed'].apply(breed_hypoaller,1)
+	df['Coat'] = df['Coat'].apply(unknown_value,1)
 	df = create_dummies(df,'size')
 	df = create_dummies(df,'intelligence')
-	df=df.drop(['Breed','size','intelligence','size_other','intelligence_other'], axis=1) 
+	df = create_dummies(df,'Coat')
+	df=df.drop(['Breed','size','intelligence','size_other','intelligence_other','Coat','Coat_Unknown'], axis=1) 
 	return df
 	
 def process_colour(df):
