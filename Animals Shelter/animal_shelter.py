@@ -12,8 +12,10 @@ test = pd.read_csv('test.csv')
 #main
 #.apply allows to apply functions to each row or column
 
+
 df=func.pre_process(train)
 df.to_csv('dataframe.csv') 
+
 features_select_K = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','KBest') #need to concat with class to obtain final dataframe for classification
 #features_select_Fdr = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fdr') #need to concat with class to obtain final dataframe for classification
 #features_select_Fwe = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fwe') #need to concat with class to obtain final dataframe for classification
