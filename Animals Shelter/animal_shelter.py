@@ -54,6 +54,8 @@ plt.figure(figsize=(20,20))
 g=sns.heatmap(correlations,cmap="RdYlGn")
 plt.show(g)
 
+print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','OutcomeType'],axis=1)))
+
 #feature selection comments:
 #age appears above all age bins except 1, even though in general age bins are good features, use age?
 #hour sin and cos have good ranking, how to use them?
@@ -62,7 +64,7 @@ plt.show(g)
 #we need to select non-repeated features according to the scores
 #how many features should we select? Just try the methods with different number of features and select best? 
 #think we can check feature importance and impact of using different features when testing classifiers, but maybe not as a pre-step given that the choice will be biased by the specific method being used and is only possible for tree based classifiers
-#look at PCA. Is it worth creating more variables? Look at rank of most important features to the principal components to see if it matches information so far
+#Top features from correlation are also high in PCA importance rank
 #final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
 #classifiers: linear SVC, random forest, logistic regression with multinomial distribution
 
