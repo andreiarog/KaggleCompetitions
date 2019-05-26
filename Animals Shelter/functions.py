@@ -1,11 +1,14 @@
 #functions
 import pandas as pd
 import numpy as np
+import math
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import SelectFdr
 from sklearn.feature_selection import SelectFwe
 from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 def pre_process(dataset):
 		
@@ -101,15 +104,15 @@ def process_name(dataset): #needs to be tested
 	df["Unknown_Name"] = np.where((df["Name"]=="Unknown"),1,0)
 	
 	df['Common_Name_85'] = common_value(df['Name'],85)
-	df['Common_Name_90'] = common_value(df['Name'],90)
-	df['Common_Name_92'] = common_value(df['Name'],92)
-	df['Common_Name_95'] = common_value(df['Name'],95)
+	#df['Common_Name_90'] = common_value(df['Name'],90)
+	#df['Common_Name_92'] = common_value(df['Name'],92)
+	#df['Common_Name_95'] = common_value(df['Name'],95)
 	
 	#Unknown names are removed from common names
 	df["Common_Name_85"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_85'])
-	df["Common_Name_90"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_90'])
-	df["Common_Name_92"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_92'])
-	df["Common_Name_95"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_95'])
+	#df["Common_Name_90"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_90'])
+	#df["Common_Name_92"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_92'])
+	#df["Common_Name_95"] = np.where((df['Name']== "Unknown"),0, df['Common_Name_95'])
 	df=df.drop(['Name'], axis=1)
 		
 	return df
@@ -425,9 +428,9 @@ def process_colour(df):
 	df['Colour'] = df['Color'].apply(order_colour,1)
 	df['no_colours'] = df['Colour'].apply(breed_colour,1)
 	df = create_dummies(df,'no_colours')
-	df['common_colour_90'] = common_value(df['Colour'],90)
-	df['common_colour_92'] = common_value(df['Colour'],92)
-	df['common_colour_95'] = common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
+	#df['common_colour_90'] = common_value(df['Colour'],90)
+	#df['common_colour_92'] = common_value(df['Colour'],92)
+	#df['common_colour_95'] = common_value(df['Colour'],95) #considers 16 most common colours as common (more than 550 occurrences)
 	df['common_colour_98'] = common_value(df['Colour'],98)
 	df=df.drop(['Color', 'Colour','no_colours','no_colours_unicolour'], axis=1) 
 
@@ -539,3 +542,20 @@ def correlation_ratio(categories, measurements):
 	else:
 		eta = numerator/denominator
 	return eta
+
+def important_features_PCA (features):
+	#scale features before PCA
+	scaler=StandardScaler()#instantiate
+	scaler.fit(features) # compute the mean and standard which will be used in the next command
+	X_scaled=scaler.transform(features)# fit and transform can be applied together and I leave that for simple exercise
+	pca=PCA() 
+	pca.fit(X_scaled) 
+	X_pca=pca.transform(X_scaled) 
+	n_columns = len(features.columns.values)
+	#scale the principal components
+	xvector = pca.components_[0]*max(X_pca[:,0])
+	yvector = pca.components_[1]*max(X_pca[:,1])
+	impt_features = {features.columns.values[i]: math.sqrt(xvector[i]**2+yvector[i]**2) for i in range(n_columns)}
+	impt_features = sorted(zip(impt_features.values(), impt_features.keys()),reverse = True)
+	
+	return impt_features
