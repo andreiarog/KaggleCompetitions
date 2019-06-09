@@ -9,6 +9,11 @@ from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_validate
+from sklearn.metrics import confusion_matrix
 
 def pre_process(dataset):
 		
@@ -559,3 +564,27 @@ def important_features_PCA (features):
 	impt_features = sorted(zip(impt_features.values(), impt_features.keys()),reverse = True)
 	
 	return impt_features
+
+def OAO_classif (df,target):
+	'''one vs one classifiers'''
+	models=[SVC()]
+	names=["SVC", "GPC"]
+	#GaussianProcessClassifier(multi_class="one_vs_one", copy_X_train = False) -- > very computacional intensive, not worth using given so many other options
+
+	X = df.drop([target], axis=1)
+	y = df[target]
+
+	i=0
+	for m in models:
+		cv_results = cross_validate(m, X, y, cv=10)
+		score = cv_results['test_score'].mean()  #score comparable to Andreia's scores
+		
+		#confusion matrix, which is more insightful for imbalanced datasets
+		y_pred = cross_val_predict(m, X, y, cv=10)
+		conf_mat = confusion_matrix(y, y_pred)
+
+		print(names[i])
+		print(score)
+		print(conf_mat)
+		i+=1
+	
