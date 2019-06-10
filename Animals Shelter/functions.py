@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import math
+from datetime import datetime
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import SelectFdr
 from sklearn.feature_selection import SelectFwe
@@ -10,6 +11,12 @@ from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
+from sklearn.linear_model import PassiveAggressiveClassifier
+from sklearn.linear_model import SGDClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_validate
@@ -567,24 +574,64 @@ def important_features_PCA (features):
 
 def OAO_classif (df,target):
 	'''one vs one classifiers'''
-	models=[SVC()]
-	names=["SVC", "GPC"]
+	models=[SVC(class_weight = 'balanced', decision_function_shape = 'ovo')]
+	names=["SVC"]
 	#GaussianProcessClassifier(multi_class="one_vs_one", copy_X_train = False) -- > very computacional intensive, not worth using given so many other options
 
 	X = df.drop([target], axis=1)
 	y = df[target]
 
+	f=open("Classifier_results.txt","a+") #opens a text file or creates it
+	now = now = datetime.now().strftime('%d-%b-%Y (%H:%M:%S)')
+	f.write('OAO classifiers: '+now+'\n')
+	
 	i=0
 	for m in models:
-		cv_results = cross_validate(m, X, y, cv=10)
+		cv_results = cross_validate(m, X, y, cv=8)
 		score = cv_results['test_score'].mean()  #score comparable to Andreia's scores
 		
 		#confusion matrix, which is more insightful for imbalanced datasets
-		y_pred = cross_val_predict(m, X, y, cv=10)
+		y_pred = cross_val_predict(m, X, y, cv=8)
+		conf_mat = confusion_matrix(y, y_pred)
+		
+		f.write(names[i]+'\n')
+		f.write('%5.12f\n' %(score))
+		
+		for l in range(len(conf_mat)):
+			for j in range(len(conf_mat[l])):
+				f.write('%i ' %(conf_mat[l][j]))
+			f.write('\n')
+
+		i+=1
+	f.close()
+	
+def OAA_classif (df,target):
+	'''one vs rest classifiers'''
+	models=[LinearSVC(multi_class='ovr', class_weight = 'balanced'), LogisticRegression(multi_class='ovr', class_weight = 'balanced'), Perceptron(class_weight = 'balanced', warm_start=True), PassiveAggressiveClassifier(warm_start=True, class_weight = 'balanced'), GradientBoostingClassifier(warm_start=True), SGDClassifier(loss='hinge',class_weight='balanced', warm_start = True), SGDClassifier(loss='log',class_weight='balanced', warm_start = True)]
+	names=["SVC", "LR", "Perceptron", "PAC", "GB", "SGD_SVC", "SGD_LR"]
+
+	X = df.drop([target], axis=1)
+	y = df[target]
+
+	f=open("Classifier_results.txt","a+") #opens a text file or creates it
+	now = datetime.now().strftime('%d-%b-%Y (%H:%M:%S)')
+	f.write('OAA classifiers: '+now+'\n')
+	
+	i=0
+	for m in models:
+		cv_results = cross_validate(m, X, y, cv=8)
+		score = cv_results['test_score'].mean()  #score comparable to Andreia's scores
+		
+		#confusion matrix, which is more insightful for imbalanced datasets
+		y_pred = cross_val_predict(m, X, y, cv=8)
 		conf_mat = confusion_matrix(y, y_pred)
 
-		print(names[i])
-		print(score)
-		print(conf_mat)
+		f.write(names[i]+'\n')
+		f.write('%5.12f\n' %(score))
+		for l in range(len(conf_mat)):
+			for j in range(len(conf_mat[l])):
+				f.write('%i ' %(conf_mat[l][j]))
+			f.write('\n')
+			
 		i+=1
-	
+	f.close()
