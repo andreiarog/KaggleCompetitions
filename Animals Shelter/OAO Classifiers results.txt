@@ -1,0 +1,12 @@
+SVC
+0.6482490158093237
+
+True Class\Pred  Adoption Died Euthanasia Return_to_Owner Transfer
+Adoption           [[9092    0    5 1087  585]
+Died               [  17    0    5   13  162]
+Euthanasia         [ 234    0   76  463  782]
+Return_to_Owner    [2189    0    6 2135  456]
+Transfer           [2389    0   32  977 6024]]
+
+#classifier unable to classify 'Died'; skewed towards 'Adoption', biggest class, which highlights importance of balancing the data
+#better than Andreia's SVM results, but similar to other classifiers used by her

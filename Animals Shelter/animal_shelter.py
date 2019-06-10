@@ -40,7 +40,7 @@ for i in df.drop(['AnimalID','OutcomeType'],axis=1).columns: #for each category,
 dfratios = pd.DataFrame(corr_r,columns = ['OutcomeType'], index=feature_corr.columns) #need to define same indexes as feature_corr to properly concatenate dataframes
 #print(dfratios)
 corr_r.append(1.000000)
-columns = ['YearTime','Weekend','Christmas','Summer','Winter','Hour_sin','Hour_cos','Month_sin','Month_cos','WeekDay_sin','WeekDay_cos','Unknown_Name','Common_Name_85','Common_Name_90','Common_Name_92','Common_Name_95','sex_Female','sex_Male','sex_intervention_Intact','sex_intervention_Intervention','age','age_bins_2 years','age_bins_3-4 years','age_bins_5-7 years','age_bins_8-10 years','age_bins_9 months to 1 year','age_bins_<= 1 month','age_bins_>1-2 months','age_bins_>2-8 months','pure','dangerous','hypoaller','size_giant','size_large','size_medium','size_small','size_toy','intelligence_above average','intelligence_average','intelligence_bright','intelligence_excellent','intelligence_fair','intelligence_lowest','no_colours_bicolour','no_colours_multicolour','common_colour_90','common_colour_92','common_colour_95','common_colour_98','TimeOfDay_Afternoon','TimeOfDay_Evening','AnimalType_Dog','OutcomeType']
+columns = ['YearTime','Weekend','Christmas','Summer','Winter','Hour_sin','Hour_cos','Month_sin','Month_cos','WeekDay_sin','WeekDay_cos','Unknown_Name','Common_Name_85','sex_Female','sex_Male','sex_intervention_Intact','sex_intervention_Intervention','age','age_bins_2 years','age_bins_3-4 years','age_bins_5-7 years','age_bins_8-10 years','age_bins_9 months to 1 year','age_bins_<= 1 month','age_bins_>1-2 months','age_bins_>2-8 months','pure','dangerous','hypoaller','size_giant','size_large','size_medium','size_small','size_toy','intelligence_above average','intelligence_average','intelligence_bright','intelligence_excellent','intelligence_fair','intelligence_lowest','no_colours_bicolour','no_colours_multicolour','common_colour_98','TimeOfDay_Afternoon','TimeOfDay_Evening','AnimalType_Dog','OutcomeType']
 
 ratios = dict(zip(columns, corr_r)) #create dictionary to transform in 1 row dataframe
 rowratios = pd.DataFrame(ratios,index=['OutcomeType']) #since dictionary is in scalar form and not list need to pass an index, which will also be needed for the heatmap (see feature_corr structure)
@@ -57,7 +57,6 @@ plt.show(g)
 print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','OutcomeType'],axis=1)))
 
 #feature selection comments:
-#age appears above all age bins except 1, even though in general age bins are good features, use age?
 #hour sin and cos have good ranking, how to use them?
 #all methods provide the same scores: all features are correlated with outcome, but some more strongly, according to scores' order
 #correlations in heatmap are aligned with feature selection results: with unknown name and intervention variables being the most strongly correlated with the outcome
@@ -67,6 +66,12 @@ print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','
 #Top features from correlation are also high in PCA importance rank
 #final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
 #classifiers: linear SVC, random forest, logistic regression with multinomial distribution
+
+#OAO baseline classification
+func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+
+#baseline classification: compare onevsone, onevsall and all&one approaches with each other and Andreia's baseline (starting with all variables and imbalanced sample); use not only accuracy but also confusion matrix and multiclass AUC
+#no proved best approach for imbalanced multiclass problems, depends on the dataset
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
