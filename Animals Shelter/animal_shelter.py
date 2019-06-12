@@ -67,11 +67,17 @@ print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','
 #final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
 #classifiers: linear SVC, random forest, logistic regression with multinomial distribution
 
-#OAO baseline classification
-func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+#OAO baseline classification with balancing
+#func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+
+#OAA baseline classification with balancing
+func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
 
 #baseline classification: compare onevsone, onevsall and all&one approaches with each other and Andreia's baseline (starting with all variables and imbalanced sample); use not only accuracy but also confusion matrix and multiclass AUC
 #no proved best approach for imbalanced multiclass problems, depends on the dataset
+#gradient boosting seems promising; SVC slightly better with OAO approach; LR also not too bad; rest really bad
+#test all again with balanced data (remove weighting)
+#try to implement all&one using SVC
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
