@@ -615,7 +615,7 @@ def OAA_classif (df,target):
 
 	f=open("Classifier_results.txt","a+") #opens a text file or creates it
 	now = datetime.now().strftime('%d-%b-%Y (%H:%M:%S)')
-	f.write('OAA classifiers: '+now+'\n')
+	f.write('OAA classifiers no warm start: '+now+'\n')
 	
 	i=0
 	for m in models:
