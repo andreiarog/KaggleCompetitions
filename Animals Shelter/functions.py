@@ -10,6 +10,7 @@ from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils import resample
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
@@ -571,10 +572,76 @@ def important_features_PCA (features):
 	impt_features = sorted(zip(impt_features.values(), impt_features.keys()),reverse = True)
 	
 	return impt_features
+	
+def downSample(dataset, chosen_column, majority_class, avg_value):
+        
+    df=dataset.copy()
+           
+    df_majority = df[df[chosen_column]==majority_class]
+    
+    df_other = df[df[chosen_column]!=majority_class]
+    
+    n_samples= avg_value
+    
+    #Upsample minority
+    df_majority_downsampled = resample(df_majority, replace=True, n_samples = n_samples, random_state=123)
+    
+    #Combine majority class with upsampled minority class
+    df_downsampled = pd.concat([df_other, df_majority_downsampled])
+   
+    print("IMPORTANT: Number of total rows decreased to", df_downsampled.shape[0], "due to balancement techniques for class", majority_class,  "\n")
+    #print()
+    
+    return df_downsampled
 
+def upSample(dataset, chosen_column, minority_class, avg_value):
+        
+    df=dataset.copy()
+           
+    df_minority = df[df[chosen_column]==minority_class]
+    
+    df_other = df[df[chosen_column]!=minority_class]
+    
+    n_samples= avg_value
+    
+    #Upsample minority
+    df_minority_upsampled = resample(df_minority, replace=True, n_samples = n_samples, random_state=123)
+    
+    #Combine majority class with upsampled minority class
+    df_upsampled = pd.concat([df_other, df_minority_upsampled])
+   
+    print("IMPORTANT: Number of total rows increased to", df_upsampled.shape[0], "due to balancement techniques in class", minority_class, "\n")
+    #print()
+    
+    return df_upsampled
+
+def balance_dataset(dataset, chosen_column):
+    df=dataset.copy()
+    
+    values=df[chosen_column].unique()
+    size = len(values)
+    
+    dfValues=[]
+    dfValuesSize=[]
+    for i in range(size):        
+        dfValue = df[df[chosen_column]==values[i]]    
+        dfValues.append(dfValue)
+        dfValuesSize.append(dfValue.shape[0])
+        
+    avg_value = int(round(sum(dfValuesSize)/len(dfValuesSize)))
+    
+    for d in dfValues:
+        value = d[chosen_column].unique()[0]
+        if (d.shape[0] < avg_value) :
+            df = upSample(df, chosen_column, value, avg_value)
+        else:
+            df = downSample(df, chosen_column, value, avg_value)
+    
+    return df
+	
 def OAO_classif (df,target):
 	'''one vs one classifiers'''
-	models=[SVC(class_weight = 'balanced', decision_function_shape = 'ovo')]
+	models=[SVC(decision_function_shape = 'ovo')]
 	names=["SVC"]
 	#GaussianProcessClassifier(multi_class="one_vs_one", copy_X_train = False) -- > very computacional intensive, not worth using given so many other options
 
@@ -607,7 +674,7 @@ def OAO_classif (df,target):
 	
 def OAA_classif (df,target):
 	'''one vs rest classifiers'''
-	models=[LinearSVC(multi_class='ovr', class_weight = 'balanced'), LogisticRegression(multi_class='ovr', class_weight = 'balanced'), Perceptron(class_weight = 'balanced', warm_start=True), PassiveAggressiveClassifier(warm_start=True, class_weight = 'balanced'), GradientBoostingClassifier(warm_start=True), SGDClassifier(loss='hinge',class_weight='balanced', warm_start = True), SGDClassifier(loss='log',class_weight='balanced', warm_start = True)]
+	models=[LinearSVC(multi_class='ovr'), LogisticRegression(multi_class='ovr'), Perceptron(warm_start=True), PassiveAggressiveClassifier(warm_start=True), GradientBoostingClassifier(warm_start=True), SGDClassifier(loss='hinge', warm_start = True), SGDClassifier(loss='log', warm_start = True)]
 	names=["SVC", "LR", "Perceptron", "PAC", "GB", "SGD_SVC", "SGD_LR"]
 
 	X = df.drop([target], axis=1)
@@ -615,7 +682,7 @@ def OAA_classif (df,target):
 
 	f=open("Classifier_results.txt","a+") #opens a text file or creates it
 	now = datetime.now().strftime('%d-%b-%Y (%H:%M:%S)')
-	f.write('OAA classifiers no warm start: '+now+'\n')
+	f.write('OAA classifiers: '+now+'\n')
 	
 	i=0
 	for m in models:
