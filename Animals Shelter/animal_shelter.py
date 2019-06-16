@@ -67,16 +67,20 @@ print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','
 #final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
 #classifiers: linear SVC, random forest, logistic regression with multinomial distribution
 
-#OAO baseline classification with balancing
-#func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+df = func.balance_dataset(df, 'OutcomeType')
+print(df['OutcomeType'].value_counts())
 
-#OAA baseline classification with balancing
-func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+#OAO baseline classification
+func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+
+#OAA baseline classification
+#func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
 
 #baseline classification: compare onevsone, onevsall and all&one approaches with each other and Andreia's baseline (starting with all variables and imbalanced sample); use not only accuracy but also confusion matrix and multiclass AUC
 #no proved best approach for imbalanced multiclass problems, depends on the dataset
 #gradient boosting seems promising; SVC slightly better with OAO approach; LR also not too bad; rest really bad
-#test all again with balanced data (remove weighting)
+#balancing the classes reduces the overall accuracy for all models, but improves classification of smaller classes (Died and Euthanasia), since precision is simillar in both circumstancies both recall improves generally with a balanced dataset
+#Gradient boosting seems to be the only OAO and OAA classifier worth keeping
 #try to implement all&one using SVC
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
