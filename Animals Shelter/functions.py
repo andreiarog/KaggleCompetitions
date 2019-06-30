@@ -641,7 +641,7 @@ def balance_dataset(dataset, chosen_column):
 	
 def OAO_classif (df,target):
 	'''one vs one classifiers'''
-	models=[SVC(decision_function_shape = 'ovo')]
+	models=[SVC(probability = True, decision_function_shape = 'ovo')]
 	names=["SVC"]
 	#GaussianProcessClassifier(multi_class="one_vs_one", copy_X_train = False) -- > very computacional intensive, not worth using given so many other options
 
@@ -654,15 +654,15 @@ def OAO_classif (df,target):
 	
 	i=0
 	for m in models:
-		cv_results = cross_validate(m, X, y, cv=8)
-		score = cv_results['test_score'].mean()  #score comparable to Andreia's scores
+		cv_results = cross_validate(m, X, y,scoring='neg_log_loss', cv=8)
+		score = -1*cv_results['test_score'].mean()  #mean of log loss
 		
 		#confusion matrix, which is more insightful for imbalanced datasets
 		y_pred = cross_val_predict(m, X, y, cv=8)
 		conf_mat = confusion_matrix(y, y_pred)
 		
 		f.write(names[i]+'\n')
-		f.write('%5.12f\n' %(score))
+		f.write('Avg logloss: %5.12f\n' %(score))
 		
 		for l in range(len(conf_mat)):
 			for j in range(len(conf_mat[l])):
@@ -674,8 +674,8 @@ def OAO_classif (df,target):
 	
 def OAA_classif (df,target):
 	'''one vs rest classifiers'''
-	models=[LinearSVC(multi_class='ovr'), LogisticRegression(multi_class='ovr'), Perceptron(warm_start=True), PassiveAggressiveClassifier(warm_start=True), GradientBoostingClassifier(warm_start=True), SGDClassifier(loss='hinge', warm_start = True), SGDClassifier(loss='log', warm_start = True)]
-	names=["SVC", "LR", "Perceptron", "PAC", "GB", "SGD_SVC", "SGD_LR"]
+	models=[SVC(probability = True, decision_function_shape = 'ovr'), LogisticRegression(multi_class='ovr'), GradientBoostingClassifier(warm_start=True)]
+	names=["SVC", "LR", "GB"] 
 
 	X = df.drop([target], axis=1)
 	y = df[target]
@@ -686,15 +686,15 @@ def OAA_classif (df,target):
 	
 	i=0
 	for m in models:
-		cv_results = cross_validate(m, X, y, cv=8)
-		score = cv_results['test_score'].mean()  #score comparable to Andreia's scores
+		cv_results = cross_validate(m, X, y, scoring='neg_log_loss', cv=8)
+		score = -1*cv_results['test_score'].mean() 
 		
 		#confusion matrix, which is more insightful for imbalanced datasets
 		y_pred = cross_val_predict(m, X, y, cv=8)
 		conf_mat = confusion_matrix(y, y_pred)
 
 		f.write(names[i]+'\n')
-		f.write('%5.12f\n' %(score))
+		f.write('Avg logloss: %5.12f\n' %(score))
 		for l in range(len(conf_mat)):
 			for j in range(len(conf_mat[l])):
 				f.write('%i ' %(conf_mat[l][j]))
