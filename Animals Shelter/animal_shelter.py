@@ -74,14 +74,17 @@ print(df['OutcomeType'].value_counts())
 func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
 
 #OAA baseline classification
-#func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType') 
 
 #baseline classification: compare onevsone, onevsall and all&one approaches with each other and Andreia's baseline (starting with all variables and imbalanced sample); use not only accuracy but also confusion matrix and multiclass AUC
 #no proved best approach for imbalanced multiclass problems, depends on the dataset
 #gradient boosting seems promising; SVC slightly better with OAO approach; LR also not too bad; rest really bad
-#balancing the classes reduces the overall accuracy for all models, but improves classification of smaller classes (Died and Euthanasia), since precision is simillar in both circumstancies both recall improves generally with a balanced dataset
-#Gradient boosting seems to be the only OAO and OAA classifier worth keeping
-#try to implement all&one using SVC
+#balancing the classes reduces the overall accuracy for all OAA models, but improves classification of smaller classes (Died and Euthanasia), since precision is simillar in both circumstancies both recall improves generally with a balanced dataset
+#Gradient boosting seems to be the only OAA classifier worth keeping
+#OAO SVC benefits highly from balancing the dataset
+#try to implement all&one using SVC --> need to adapt code of both classifiers (functions), since elements needed to combine them are not output in existing functions
+
+#predict_proba to return probabilities (cross validation already included in this function); probability = True in model definition
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
