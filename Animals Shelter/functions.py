@@ -9,19 +9,23 @@ from sklearn.feature_selection import SelectFwe
 from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from sklearn.utils import resample
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import Perceptron
-from sklearn.linear_model import PassiveAggressiveClassifier
-from sklearn.linear_model import SGDClassifier
+from sklearn.linear_model import LogisticRegression, Perceptron, PassiveAggressiveClassifier, SGDClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_val_predict, cross_validate, KFold, cross_val_score
 from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import LinearSVC
+from sklearn.neural_network import MLPClassifier
+import xgboost as xgb
+from xgboost import XGBClassifier
+from sklearn.multiclass import OneVsRestClassifier
+import re
 
 def pre_process(dataset):
 		
@@ -702,3 +706,52 @@ def OAA_classif (df,target):
 			
 		i+=1
 	f.close()
+    
+def classify(dataset, chosen_class, tunning=False):
+    df =dataset.copy()
+    
+    df=df.drop(['AnimalID'], axis=1)
+
+    models=[KNeighborsClassifier(), RandomForestClassifier(), MLPClassifier(), LogisticRegression()]
+    #LinearSVC(multi_class='crammer_singer') has no attribute predict_proba
+    names=["knn", "rf", 'nn', 'lr']
+
+    X = df.drop(['OutcomeType'], axis=1)
+    y = df['OutcomeType']
+
+    i=0
+    for m in models:
+        cv_results = cross_validate(m, X, y, scoring='neg_log_loss', cv=5)
+        score = -1*cv_results['test_score'].mean()  
+        print(names[i])
+        print(score)
+        i+=1
+
+
+def train_XGBoost(dataset, chosen_class):
+    
+    df = dataset.copy()
+
+    #Clean data for XGBoost because of error: feature_names may not contain [, ] or <
+    regex = re.compile(r"\[|\]|<", re.IGNORECASE)
+    df.columns = [regex.sub("_", col) if any(x in str(col) for x in set(('[', ']', '<'))) else col for col in df.columns.values]
+    
+    
+    X = df.drop(['AnimalID', chosen_class], axis=1)
+    y = df[['AnimalID', chosen_class]]
+    y = create_dummies(y,chosen_class)  
+    
+    mlb = MultiLabelBinarizer()
+    y[chosen_class] = mlb.fit_transform(y[chosen_class])
+    print(y) 
+    y = y.drop('AnimalID', axis=1)
+    
+    clf_multilabel = OneVsRestClassifier(xgb.XGBClassifier(n_jobs=-1))
+    
+    kfold = KFold(n_splits=10, shuffle=True, random_state=123)
+
+    score=cross_val_score(clf_multilabel, X, y, cv=kfold, n_jobs=-1, scoring='neg_log_loss')
+    
+    print("Log-loss:", score.mean())
+    
+    
