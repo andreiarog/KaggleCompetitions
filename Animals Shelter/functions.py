@@ -24,8 +24,10 @@ from sklearn.svm import LinearSVC
 from sklearn.neural_network import MLPClassifier
 import xgboost as xgb
 from xgboost import XGBClassifier
-from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
 import re
+from sklearn.preprocessing import LabelEncoder
+
 
 def pre_process(dataset):
 		
@@ -728,7 +730,7 @@ def classify(dataset, chosen_class, tunning=False):
         i+=1
 
 
-def train_XGBoost(dataset, chosen_class):
+def train_XGBoost(dataset, chosen_class, mode):
     
     df = dataset.copy()
 
@@ -739,18 +741,22 @@ def train_XGBoost(dataset, chosen_class):
     
     X = df.drop(['AnimalID', chosen_class], axis=1)
     y = df[['AnimalID', chosen_class]]
-    y = create_dummies(y,chosen_class)  
+    #y = create_dummies(y,chosen_class)  
     
-    mlb = MultiLabelBinarizer()
-    y[chosen_class] = mlb.fit_transform(y[chosen_class])
+    enc = LabelEncoder()
+    y[chosen_class] = enc.fit_transform(y[chosen_class])
+    #y[chosen_class] = mlb.fit_transform(y[chosen_class])
     print(y) 
     y = y.drop('AnimalID', axis=1)
     
-    clf_multilabel = OneVsRestClassifier(xgb.XGBClassifier(n_jobs=-1))
+    if (mode=="ovo"):
+        clf = OneVsOneClassifier(xgb.XGBClassifier(n_jobs=-1))    
+    else:
+        clf = OneVsRestClassifier(xgb.XGBClassifier(n_jobs=-1))
     
     kfold = KFold(n_splits=10, shuffle=True, random_state=123)
 
-    score=cross_val_score(clf_multilabel, X, y, cv=kfold, n_jobs=-1, scoring='neg_log_loss')
+    score=cross_val_score(clf, X, y, cv=kfold, n_jobs=-1, scoring='neg_log_loss')
     
     print("Log-loss:", score.mean())
     
