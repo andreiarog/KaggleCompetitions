@@ -9,25 +9,19 @@ from sklearn.feature_selection import SelectFwe
 from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_classif
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
+from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
-from sklearn.linear_model import LogisticRegression, Perceptron, PassiveAggressiveClassifier, SGDClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
+from sklearn.linear_model import PassiveAggressiveClassifier
+from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.model_selection import cross_val_predict, cross_validate, KFold, cross_val_score
+from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_validate
 from sklearn.metrics import confusion_matrix
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
-from sklearn.neural_network import MLPClassifier
-import xgboost as xgb
-from xgboost import XGBClassifier
-from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
-import re
-from sklearn.preprocessing import LabelEncoder
-
 
 def pre_process(dataset):
 		
@@ -455,12 +449,12 @@ def process_colour(df):
 
 	return df
 	
-def feature_selection(df,tgt,mtd):
+def feature_selection(df,tgt,mtd,slct=10):
 	'''function to do feature selection for the target specified by tgt and using the method specified by mtd'''
 	target = df[tgt]
 	features = df.drop([tgt], axis=1)
 	if mtd == 'KBest':
-		bestfeatures = SelectKBest(score_func=f_classif, k=10)
+		bestfeatures = SelectKBest(score_func=f_classif, k=slct)
 		fit = bestfeatures.fit(features,target)
 		dfscores = pd.DataFrame(fit.scores_)
 		dfcolumns = pd.DataFrame(features.columns)
@@ -504,7 +498,7 @@ def feature_selection(df,tgt,mtd):
 		select_cols = features.columns.values[fit.get_support()] #get_support returns a boolean vector indicating which features (columns' names) were selected
 		selectfeatures = pd.DataFrame(fit.transform(features),columns = select_cols) #build dataframe with selected features only
 
-	return featureScores #selectfeatures
+	return select_cols #selectfeatures featureScores
 
 def convert(data, to):
 	converted = None
@@ -678,17 +672,20 @@ def OAO_classif (df,target):
 		i+=1
 	f.close()
 	
-def OAA_classif (df,target):
+def OAA_classif (X,y):
 	'''one vs rest classifiers'''
-	models=[SVC(probability = True, decision_function_shape = 'ovr'), LogisticRegression(multi_class='ovr'), GradientBoostingClassifier(warm_start=True)]
-	names=["SVC", "LR", "GB"] 
+	models=[LogisticRegression(multi_class='ovr'), GradientBoostingClassifier(warm_start=True)] #SVC(probability = True, decision_function_shape = 'ovr'), 
+	names=["LR", "GB"] 
 
-	X = df.drop([target], axis=1)
-	y = df[target]
+	#X = df.drop([target], axis=1)
+	#y = df[target]
 
 	f=open("Classifier_results.txt","a+") #opens a text file or creates it
 	now = datetime.now().strftime('%d-%b-%Y (%H:%M:%S)')
 	f.write('OAA classifiers: '+now+'\n')
+	cols = X.columns.values
+	for c in range(len(cols)):
+		f.write(cols[c]+'\n')
 	
 	i=0
 	for m in models:
@@ -708,56 +705,3 @@ def OAA_classif (df,target):
 			
 		i+=1
 	f.close()
-    
-def classify(dataset, chosen_class, tunning=False):
-    df =dataset.copy()
-    
-    df=df.drop(['AnimalID'], axis=1)
-
-    models=[KNeighborsClassifier(), RandomForestClassifier(), MLPClassifier(), LogisticRegression()]
-    #LinearSVC(multi_class='crammer_singer') has no attribute predict_proba
-    names=["knn", "rf", 'nn', 'lr']
-
-    X = df.drop(['OutcomeType'], axis=1)
-    y = df['OutcomeType']
-
-    i=0
-    for m in models:
-        cv_results = cross_validate(m, X, y, scoring='neg_log_loss', cv=5)
-        score = -1*cv_results['test_score'].mean()  
-        print(names[i])
-        print(score)
-        i+=1
-
-
-def train_XGBoost(dataset, chosen_class, mode):
-    
-    df = dataset.copy()
-
-    #Clean data for XGBoost because of error: feature_names may not contain [, ] or <
-    regex = re.compile(r"\[|\]|<", re.IGNORECASE)
-    df.columns = [regex.sub("_", col) if any(x in str(col) for x in set(('[', ']', '<'))) else col for col in df.columns.values]
-    
-    
-    X = df.drop(['AnimalID', chosen_class], axis=1)
-    y = df[['AnimalID', chosen_class]]
-    #y = create_dummies(y,chosen_class)  
-    
-    enc = LabelEncoder()
-    y[chosen_class] = enc.fit_transform(y[chosen_class])
-    #y[chosen_class] = mlb.fit_transform(y[chosen_class])
-    print(y) 
-    y = y.drop('AnimalID', axis=1)
-    
-    if (mode=="ovo"):
-        clf = OneVsOneClassifier(xgb.XGBClassifier(n_jobs=-1))    
-    else:
-        clf = OneVsRestClassifier(xgb.XGBClassifier(n_jobs=-1))
-    
-    kfold = KFold(n_splits=10, shuffle=True, random_state=123)
-
-    score=cross_val_score(clf, X, y, cv=kfold, n_jobs=-1, scoring='neg_log_loss')
-    
-    print("Log-loss:", score.mean())
-    
-    
