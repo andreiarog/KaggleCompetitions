@@ -16,7 +16,7 @@ test = pd.read_csv('test.csv')
 df=func.pre_process(train)
 df.to_csv('dataframe.csv') 
 
-features_select_K = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','KBest') #need to concat with class to obtain final dataframe for classification
+features_select_K = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','KBest',10) #need to concat with class to obtain final dataframe for classification
 #features_select_Fdr = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fdr') #need to concat with class to obtain final dataframe for classification
 #features_select_Fwe = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Fwe') #need to concat with class to obtain final dataframe for classification
 #features_select_Pct = func.feature_selection(df.drop(['AnimalID'],axis=1),'OutcomeType','Pct') #need to concat with class to obtain final dataframe for classification
@@ -67,14 +67,18 @@ print('Feature importance:' , func.important_features_PCA (df.drop(['AnimalID','
 #final features: keep common_name_85 and common_colour_98; keep age and bins but never use together (same for weekend and weekday_sin)
 #classifiers: linear SVC, random forest, logistic regression with multinomial distribution
 
-df = func.balance_dataset(df, 'OutcomeType')
-print(df['OutcomeType'].value_counts())
+#df = func.balance_dataset(df, 'OutcomeType')
+#print(df['OutcomeType'].value_counts())
 
 #OAO baseline classification
-func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
+#func.OAO_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
 
 #OAA baseline classification
-func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType') 
+cols = func.convert(features_select_K,'list')
+
+X = df[cols]
+y = df['OutcomeType']
+func.OAA_classif(X,y) 
 
 #baseline classification: compare onevsone, onevsall and all&one approaches with each other and Andreia's baseline (starting with all variables and imbalanced sample); use not only accuracy but also confusion matrix and multiclass AUC
 #no proved best approach for imbalanced multiclass problems, depends on the dataset
@@ -82,9 +86,8 @@ func.OAA_classif(df.drop(['AnimalID'],axis=1), 'OutcomeType')
 #balancing the classes reduces the overall accuracy for all OAA models, but improves classification of smaller classes (Died and Euthanasia), since precision is simillar in both circumstancies both recall improves generally with a balanced dataset
 #Gradient boosting seems to be the only OAA classifier worth keeping
 #OAO SVC benefits highly from balancing the dataset
-#try to implement all&one using SVC --> need to adapt code of both classifiers (functions), since elements needed to combine them are not output in existing functions
-
 #predict_proba to return probabilities (cross validation already included in this function); probability = True in model definition
+#with log-loss, it seems better to not balance the dataset
 
 #dataset unbalanced towards neutered/spayed, which is more than double 'intact' animals (might need to omit this variable); gender balance is fine
 #good correlation between sex_intervention and outcome	
